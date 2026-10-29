@@ -22,6 +22,8 @@ data class UserPreferences(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val dynamicColor: Boolean = true,
     val languageTag: String = "system",
+    /** Third-party extractor plugins. Off until the user turns them on. */
+    val onlineSourcesEnabled: Boolean = false,
 )
 
 interface SettingsRepository {
@@ -29,6 +31,7 @@ interface SettingsRepository {
     suspend fun setThemeMode(mode: ThemeMode)
     suspend fun setDynamicColor(enabled: Boolean)
     suspend fun setLanguageTag(tag: String)
+    suspend fun setOnlineSourcesEnabled(enabled: Boolean)
 }
 
 // A single DataStore instance per process; the delegate enforces that.
@@ -42,6 +45,7 @@ class DataStoreSettingsRepository(
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val LANGUAGE_TAG = stringPreferencesKey("language_tag")
+        val ONLINE_SOURCES = booleanPreferencesKey("online_sources_enabled")
     }
 
     override val preferences: Flow<UserPreferences> = dataStore.data
@@ -51,6 +55,7 @@ class DataStoreSettingsRepository(
                 themeMode = ThemeMode.fromStorage(prefs[Keys.THEME_MODE]),
                 dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: true,
                 languageTag = prefs[Keys.LANGUAGE_TAG] ?: "system",
+                onlineSourcesEnabled = prefs[Keys.ONLINE_SOURCES] ?: false,
             )
         }
 
@@ -64,6 +69,10 @@ class DataStoreSettingsRepository(
 
     override suspend fun setLanguageTag(tag: String) {
         dataStore.edit { it[Keys.LANGUAGE_TAG] = tag }
+    }
+
+    override suspend fun setOnlineSourcesEnabled(enabled: Boolean) {
+        dataStore.edit { it[Keys.ONLINE_SOURCES] = enabled }
     }
 }
 

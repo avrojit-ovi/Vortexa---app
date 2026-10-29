@@ -21,10 +21,16 @@ kotlin { compilerOptions { jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
+    implementation(project(":core:online"))
+    implementation(project(":core:playback"))
 
+    implementation(libs.media3.session)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

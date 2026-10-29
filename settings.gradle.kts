@@ -28,6 +28,9 @@ include(":app")
 include(":core:common")
 include(":core:ui")
 include(":core:database")
+include(":core:media-api")
+include(":core:playback")
+include(":core:online")
 
 // Features
 include(":feature:downloader")

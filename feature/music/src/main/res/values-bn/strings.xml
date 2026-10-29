@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_title">মিউজিক</string>
-    <string name="feature_description">গ্রাফিক/প্যারামেট্রিক EQ আর DSP সহ Poweramp-স্টাইল প্লেয়ার Phase 7-এ আসবে।</string>
-    <string name="feature_phase">Phase 7</string>
+    <string name="music_search_hint">সোর্সে খুঁজুন, বা সরাসরি লিংক দিন</string>
+    <string name="music_search">খুঁজুন</string>
+    <string name="music_play">চালান</string>
+    <string name="music_pause">থামান</string>
+    <string name="music_sleep_off">স্লিপ টাইমার বন্ধ</string>
+
+    <string name="music_sources_off_title">অনলাইন সোর্স বন্ধ আছে</string>
+    <string name="music_sources_off_body">আপনি চালু না করলে কোনো থার্ড-পার্টি কিছুই চলে না। Settings → Online sources থেকে বিল্ট-ইন ডিরেক্ট-লিংক সোর্স চালু করতে পারেন, আর নিজে ইনস্টল করা এক্সট্রাক্টর প্লাগিন যোগ করতে পারেন।</string>
+    <string name="music_open_settings">সেটিংস খুলুন</string>
 </resources>

@@ -1,6 +1,8 @@
 package com.vortexa.feature.settings
 
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,9 +17,11 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -32,6 +36,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vortexa.core.common.preferences.ThemeMode
 import com.vortexa.core.common.preferences.UserPreferences
+import com.vortexa.core.online.OnlineSourcesState
+import com.vortexa.core.online.SourceInfo
 
 @Composable
 fun SettingsScreen(
@@ -39,10 +45,27 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
+    val online by viewModel.online.collectAsStateWithLifecycle()
+    val message by viewModel.pluginMessage.collectAsStateWithLifecycle()
+
+    val pickPlugin = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        viewModel.installPlugin(uri)
+    }
+
     SettingsContent(
         preferences = preferences,
+        online = online,
+        pluginMessage = message,
         onThemeModeChange = viewModel::setThemeMode,
         onDynamicColorChange = viewModel::setDynamicColor,
+        onOnlineSourcesChange = viewModel::setOnlineSources,
+        onReloadSources = viewModel::reloadSources,
+        onAddPlugin = {
+            // Any MIME filter that still shows .apk files: some pickers report octet-stream.
+            pickPlugin.launch(arrayOf("application/vnd.android.package-archive", "application/octet-stream"))
+        },
+        onRemovePlugin = viewModel::removePlugin,
+        onDismissMessage = viewModel::clearPluginMessage,
         modifier = modifier,
     )
 }
@@ -50,8 +73,15 @@ fun SettingsScreen(
 @Composable
 internal fun SettingsContent(
     preferences: UserPreferences,
+    online: OnlineSourcesState,
+    pluginMessage: PluginMessage?,
     onThemeModeChange: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
+    onOnlineSourcesChange: (Boolean) -> Unit,
+    onReloadSources: () -> Unit,
+    onAddPlugin: () -> Unit,
+    onRemovePlugin: (String) -> Unit,
+    onDismissMessage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -97,6 +127,18 @@ internal fun SettingsContent(
         }
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        OnlineSourcesSection(
+            online = online,
+            pluginMessage = pluginMessage,
+            onEnabledChange = onOnlineSourcesChange,
+            onReload = onReloadSources,
+            onAddPlugin = onAddPlugin,
+            onRemovePlugin = onRemovePlugin,
+            onDismissMessage = onDismissMessage,
+        )
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         SectionHeader(text = stringResource(R.string.settings_about))
         Text(
             text = stringResource(R.string.settings_version, appVersion()),
@@ -110,6 +152,133 @@ internal fun SettingsContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun OnlineSourcesSection(
+    online: OnlineSourcesState,
+    pluginMessage: PluginMessage?,
+    onEnabledChange: (Boolean) -> Unit,
+    onReload: () -> Unit,
+    onAddPlugin: () -> Unit,
+    onRemovePlugin: (String) -> Unit,
+    onDismissMessage: () -> Unit,
+) {
+    SectionHeader(text = stringResource(R.string.settings_online))
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.settings_online_summary),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                text = stringResource(R.string.settings_online_warning),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+        Switch(checked = online.enabled, onCheckedChange = onEnabledChange)
+    }
+
+    if (online.enabled) {
+        Text(
+            text = stringResource(R.string.settings_online_sources),
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(top = 8.dp),
+        )
+        if (online.sources.isEmpty()) {
+            Text(
+                text = stringResource(R.string.settings_online_none),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 8.dp),
+            )
+        }
+        online.sources.forEach { source ->
+            SourceRow(
+                source = source,
+                onRemove = source.pluginFile?.let { file -> { onRemovePlugin(file) } },
+            )
+        }
+
+        online.failures.forEach { failure ->
+            Text(
+                text = stringResource(R.string.settings_online_plugin_failed, failure.fileName, failure.message),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(vertical = 2.dp),
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OutlinedButton(onClick = onAddPlugin) {
+                Text(text = stringResource(R.string.settings_online_add))
+            }
+            TextButton(onClick = onReload) {
+                Text(text = stringResource(R.string.settings_online_refresh))
+            }
+        }
+    }
+
+    when (val message = pluginMessage) {
+        null -> Unit
+        PluginMessage.Installed -> Text(
+            text = stringResource(R.string.settings_online_installed),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(top = 8.dp),
+        )
+
+        is PluginMessage.Failed -> Text(
+            text = message.reason,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.padding(top = 8.dp),
+        )
+    }
+    if (pluginMessage != null) {
+        TextButton(onClick = onDismissMessage) { Text(text = "OK") }
+    }
+}
+
+@Composable
+private fun SourceRow(source: SourceInfo, onRemove: (() -> Unit)?) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = source.name, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = if (source.isBuiltIn) {
+                    stringResource(R.string.settings_online_builtin)
+                } else {
+                    "${source.id} · v${source.version}"
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (onRemove != null) {
+            TextButton(onClick = onRemove) {
+                Text(text = stringResource(R.string.settings_online_remove))
+            }
+        }
     }
 }
 

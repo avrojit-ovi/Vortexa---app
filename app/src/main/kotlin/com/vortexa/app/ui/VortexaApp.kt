@@ -98,7 +98,9 @@ fun VortexaApp(modifier: Modifier = Modifier) {
                     },
                 )
             }
-            composable(TopLevelDestination.MUSIC.route) { MusicScreen() }
+            composable(TopLevelDestination.MUSIC.route) {
+                MusicScreen(onOpenSettings = { navController.navigate(Routes.SETTINGS) })
+            }
             composable(TopLevelDestination.MORE.route) {
                 MoreScreen(
                     onOpenVault = { navController.navigate(Routes.VAULT) },

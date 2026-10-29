@@ -21,6 +21,7 @@ kotlin { compilerOptions { jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
+    implementation(project(":core:playback"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.media3.exoplayer)

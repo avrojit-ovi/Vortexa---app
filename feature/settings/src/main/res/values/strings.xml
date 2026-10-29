@@ -14,4 +14,16 @@
     <string name="settings_about">About</string>
     <string name="settings_version">Version %1$s</string>
     <string name="settings_license">Proprietary build. All rights reserved.</string>
+
+    <string name="settings_online">Online sources (plugins)</string>
+    <string name="settings_online_summary">Off by default. Play links and results from sources you add yourself.</string>
+    <string name="settings_online_warning">This feature is third-party. It may break the service&#8217;s terms of use — use it at your own responsibility.</string>
+    <string name="settings_online_sources">Sources</string>
+    <string name="settings_online_none">No sources loaded.</string>
+    <string name="settings_online_builtin">Built-in</string>
+    <string name="settings_online_add">Add extractor plugin (.apk)</string>
+    <string name="settings_online_remove">Remove</string>
+    <string name="settings_online_plugin_failed">%1$s could not be loaded: %2$s</string>
+    <string name="settings_online_installed">Plugin added. It will be loaded the next time sources are reloaded.</string>
+    <string name="settings_online_refresh">Reload sources</string>
 </resources>

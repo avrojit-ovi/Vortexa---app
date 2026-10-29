@@ -30,6 +30,17 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · ⛔ not built on purpose
 | HW/HW+/SW decoder switch, Kids Lock | ⏳ |
 | Gestures (brightness/volume/seek), subtitle formats + styling + delay | ⏳ |
 
+## Online sources (plugin architecture, opt-in)
+| Feature | Status |
+|---|---|
+| `Extractor` contract: search, resolve, metadata, playlists | ✅ |
+| Built-in direct-link extractor (progressive, HLS, DASH) | ✅ |
+| User-installed extractor plugins (separate APK, DexClassLoader, API v1) | ✅ |
+| Off by default, plugin install/remove/reload + warning in Settings | ✅ |
+| Broken plugin → readable error, never a crash | ✅ (failure isolation unit-tested) |
+| Music tab search + play through the shared session (background, lockscreen, sleep timer) | ✅ |
+| Queue, mini-player, EQ for online streams | ⏳ next |
+
 ## Music (phase 7) — planned next
 
 | Feature | Status |
@@ -48,4 +59,4 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · ⛔ not built on purpose
 | Vault, unified search, mini-player (phase 8) | ⏳ |
 | Online Video module, opt-in (phase 9) | ⏳ |
 | YouTube ad bypass / background play / download | ⛔ |
-| YouTube / YouTube Music stream extraction or audio-only playback of YouTube content | ⛔ (breaks YouTube's terms; deep links to the official app only) |
+| YouTube / YouTube Music extraction shipped by this repository | ⛔ (breaks YouTube's terms; the repo itself ships no service-specific extractor — a user-installed plugin is the user's own decision) |

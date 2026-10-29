@@ -49,6 +49,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import com.vortexa.core.playback.PlaybackService
 import com.vortexa.feature.video.R
 import java.io.File
 import kotlinx.coroutines.delay

@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_title">Music</string>
-    <string name="feature_description">Poweramp-style player with a graphic/parametric EQ and DSP arrives in phase 7.</string>
-    <string name="feature_phase">Phase 7</string>
+    <string name="music_search_hint">Search your enabled sources, or paste a direct link</string>
+    <string name="music_search">Search</string>
+    <string name="music_play">Play</string>
+    <string name="music_pause">Pause</string>
+    <string name="music_sleep_off">Sleep timer off</string>
+
+    <string name="music_sources_off_title">Online sources are off</string>
+    <string name="music_sources_off_body">Nothing third-party runs until you turn it on. Settings → Online sources lets you enable the built-in direct-link source and add extractor plugins you install yourself.</string>
+    <string name="music_open_settings">Open settings</string>
 </resources>

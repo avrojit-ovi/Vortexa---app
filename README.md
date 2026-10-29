@@ -45,6 +45,7 @@ adb install vortexa-0.2.0-release.apk
 - **Working download screen** — add a link, watch live progress and speed, pause/resume/remove. The queue lives in an application-scoped coroutine owner, so changing screens never cancels a transfer.
 - **Segmented download engine** — range probing, parallel ranged download, progress flow with live speed, retry, checksum (SHA-256/MD5/SHA-1).
 - **Crash-safe resume** — per-range offsets (`start-end:downloaded;…`) are persisted in Room every second, and a migration carries v1 databases forward.
+- **A neutral online layer** — the Music tab can play a direct link (file, HLS or DASH) out of the box, and optional extractor plugins you install yourself plug into the same session, so background playback and lock-screen controls behave identically. Off by default, isolated so a broken plugin cannot crash the app. Contract: [docs/PLUGIN_API.md](docs/PLUGIN_API.md).
 - **A player for what you downloaded** — a Media3 session service plays in the background with notification and headset controls, remembers where you stopped per file, and supports speed presets, fit/fill and picture-in-picture.
 - **Downloads survive leaving the app** — a `dataSync` foreground service keeps the process alive with one aggregate notification (progress, speed, "Pause all") and stops itself the moment nothing is running.
 - **Rust core** — range planning, resume decisions and streaming hashes, 21 unit tests, same test vectors as the Kotlin planner.
