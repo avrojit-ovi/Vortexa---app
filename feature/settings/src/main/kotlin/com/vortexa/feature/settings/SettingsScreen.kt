@@ -58,6 +58,8 @@ fun SettingsScreen(
         pluginMessage = message,
         onThemeModeChange = viewModel::setThemeMode,
         onDynamicColorChange = viewModel::setDynamicColor,
+        onSpeedLimitChange = viewModel::setSpeedLimit,
+        onScheduleChange = viewModel::setSchedule,
         onOnlineSourcesChange = viewModel::setOnlineSources,
         onReloadSources = viewModel::reloadSources,
         onAddPlugin = {
@@ -77,6 +79,8 @@ internal fun SettingsContent(
     pluginMessage: PluginMessage?,
     onThemeModeChange: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
+    onSpeedLimitChange: (Int) -> Unit,
+    onScheduleChange: (Boolean, Int, Int) -> Unit,
     onOnlineSourcesChange: (Boolean) -> Unit,
     onReloadSources: () -> Unit,
     onAddPlugin: () -> Unit,
@@ -128,6 +132,14 @@ internal fun SettingsContent(
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
+        DownloadsSection(
+            preferences = preferences,
+            onSpeedLimitChange = onSpeedLimitChange,
+            onScheduleChange = onScheduleChange,
+        )
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
         OnlineSourcesSection(
             online = online,
             pluginMessage = pluginMessage,
@@ -154,6 +166,85 @@ internal fun SettingsContent(
         Spacer(Modifier.height(24.dp))
     }
 }
+
+@Composable
+private fun DownloadsSection(
+    preferences: UserPreferences,
+    onSpeedLimitChange: (Int) -> Unit,
+    onScheduleChange: (Boolean, Int, Int) -> Unit,
+) {
+    SectionHeader(text = stringResource(R.string.settings_downloads))
+    Text(
+        text = stringResource(R.string.settings_speed_limit),
+        style = MaterialTheme.typography.titleMedium,
+    )
+    SPEED_LIMITS.forEach { kbps ->
+        ThemeRow(
+            label = if (kbps == 0) {
+                stringResource(R.string.settings_speed_unlimited)
+            } else {
+                stringResource(R.string.settings_speed_value, kbps)
+            },
+            selected = preferences.speedLimitKbps == kbps,
+            onSelect = { onSpeedLimitChange(kbps) },
+        )
+    }
+
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.settings_schedule),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = stringResource(
+                    R.string.settings_schedule_summary,
+                    DownloadScheduleLabel.format(preferences.scheduleStartMinute, preferences.scheduleEndMinute),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(
+            checked = preferences.scheduleEnabled,
+            onCheckedChange = { enabled ->
+                onScheduleChange(enabled, preferences.scheduleStartMinute, preferences.scheduleEndMinute)
+            },
+        )
+    }
+
+    if (preferences.scheduleEnabled) {
+        SCHEDULE_WINDOWS.forEach { window ->
+            ThemeRow(
+                label = DownloadScheduleLabel.format(window.first, window.second),
+                selected = preferences.scheduleStartMinute == window.first &&
+                    preferences.scheduleEndMinute == window.second,
+                onSelect = { onScheduleChange(true, window.first, window.second) },
+            )
+        }
+    }
+}
+
+/** Formatting shared with the engine's schedule, without importing it here. */
+private object DownloadScheduleLabel {
+    fun format(startMinute: Int, endMinute: Int): String =
+        "${formatMinute(startMinute)} – ${formatMinute(endMinute)}"
+
+    private fun formatMinute(minuteOfDay: Int): String {
+        val minute = minuteOfDay.coerceIn(0, 24 * 60 - 1)
+        return "%02d:%02d".format(minute / 60, minute % 60)
+    }
+}
+
+private val SPEED_LIMITS = listOf(0, 512, 1024, 2048)
+private val SCHEDULE_WINDOWS = listOf(23 * 60 to 6 * 60, 1 * 60 to 7 * 60)
 
 @Composable
 private fun OnlineSourcesSection(

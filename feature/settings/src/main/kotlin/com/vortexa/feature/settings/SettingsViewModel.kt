@@ -53,6 +53,16 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setDynamicColor(enabled) }
     }
 
+    fun setSpeedLimit(kbps: Int) {
+        viewModelScope.launch { settingsRepository.setSpeedLimitKbps(kbps) }
+    }
+
+    fun setSchedule(enabled: Boolean, startMinute: Int, endMinute: Int) {
+        viewModelScope.launch {
+            settingsRepository.setDownloadSchedule(enabled, startMinute, endMinute)
+        }
+    }
+
     fun setOnlineSources(enabled: Boolean) {
         viewModelScope.launch { onlineSources.setEnabled(enabled) }
     }

@@ -31,7 +31,9 @@ Distribution: GitHub Releases + F-Droid only.
 | Application-scoped queue (survives screen changes) | done | LOW |
 | `dataSync` foreground service + aggregate notification + Pause all | done | LOW |
 | Room v1→v2 migration (existing installs keep their data) | done | LOW |
-| Speed limiter, proxy/auth, scheduler, categories, SD-card (SAF), batch import | planned | LOW |
+| Speed limiter: one byte budget per download shared by every range, read from settings | implemented + 6 unit tests | LOW |
+| Daily schedule: queued downloads only start inside the window (cross-midnight supported), checked every minute | implemented + 5 unit tests | LOW |
+| Proxy/auth, categories, SD-card (SAF), batch import | planned | LOW |
 
 ## 4. Torrent + adaptive download · planned
 | Feature | Status | Risk |

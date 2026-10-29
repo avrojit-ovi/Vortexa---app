@@ -39,6 +39,8 @@ data class DownloadSpec(
     val retryDelayMillis: Long = 1_000L,
     /** Ranges left over from a previous session; empty means "start fresh". */
     val resumeStates: List<SegmentState> = emptyList(),
+    /** Shared cap for the whole download; 0 means no limit. */
+    val bytesPerSecond: Long = 0L,
 )
 
 /**
@@ -101,13 +103,15 @@ class DownloadEngine(
         val states = resolveStates(spec, metadata)
         val alreadyOnDisk = states.sumOf { it.downloaded }
         val emitter: suspend (DownloadEvent) -> Unit = { event -> emit(event) }
+        // One limiter for every range, so the cap is per file and not per part.
+        val limiter = RateLimiter(spec.bytesPerSecond)
 
         try {
             RandomAccessFile(spec.file, "rw").use { raf ->
                 // Sparse pre-allocation: the final size is known, holes are cheap.
                 raf.setLength(metadata.totalBytes)
                 val channel = raf.channel
-                downloadInto(spec, metadata, states, channel, alreadyOnDisk, emitter)
+                downloadInto(spec, metadata, states, channel, alreadyOnDisk, limiter, emitter)
             }
         } catch (io: java.io.IOException) {
             // The partial file is kept on purpose so the next run can resume it.
@@ -138,6 +142,7 @@ class DownloadEngine(
         states: List<SegmentState>,
         channel: FileChannel,
         alreadyOnDisk: Long,
+        limiter: RateLimiter,
         emit: suspend (DownloadEvent) -> Unit,
     ) = coroutineScope {
         val lock = Any()
@@ -178,6 +183,7 @@ class DownloadEngine(
                         start = state.start + state.downloaded,
                         end = state.end,
                         channel = channel,
+                        limiter = limiter,
                         onBytes = { writtenInRange ->
                             val updated = state.downloaded + writtenInRange
                             synchronized(lock) {
@@ -212,6 +218,7 @@ class DownloadEngine(
         start: Long,
         end: Long,
         channel: FileChannel,
+        limiter: RateLimiter,
         onBytes: (Long) -> Unit,
         retriesLeft: Int,
     ) {
@@ -227,7 +234,7 @@ class DownloadEngine(
                     if (response.code != 206 && response.code != 200) {
                         throw DownloadHttpException(response.code, response.message)
                     }
-                    copyBody(response, channel, start, onBytes)
+                    copyBody(response, channel, start, limiter, onBytes)
                 }
                 return
             } catch (io: java.io.IOException) {
@@ -242,6 +249,7 @@ class DownloadEngine(
         response: Response,
         channel: FileChannel,
         startPosition: Long,
+        limiter: RateLimiter,
         onBytes: (Long) -> Unit,
     ) {
         val source = response.body.source()
@@ -261,6 +269,7 @@ class DownloadEngine(
             }
             position += read
             writtenInRange += read
+            limiter.acquire(read)
             onBytes(writtenInRange)
         }
     }

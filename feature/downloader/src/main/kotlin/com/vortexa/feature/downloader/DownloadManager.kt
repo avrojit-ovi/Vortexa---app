@@ -5,13 +5,16 @@ import android.os.Environment
 import com.vortexa.core.common.file.FileNameSanitizer
 import com.vortexa.core.database.dao.DownloadDao
 import com.vortexa.core.database.entity.DownloadEntity
+import com.vortexa.core.common.preferences.SettingsRepository
 import com.vortexa.core.database.entity.DownloadStatus
 import com.vortexa.feature.downloader.engine.DownloadEngine
 import com.vortexa.feature.downloader.engine.DownloadEvent
+import com.vortexa.feature.downloader.engine.DownloadSchedule
 import com.vortexa.feature.downloader.engine.DownloadSpec
 import com.vortexa.feature.downloader.engine.SegmentCodec
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import java.util.Calendar
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,7 +24,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrl
 
@@ -35,6 +40,7 @@ class DownloadManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val dao: DownloadDao,
     private val engine: DownloadEngine,
+    settings: SettingsRepository,
 ) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -43,6 +49,46 @@ class DownloadManager @Inject constructor(
 
     /** Live speed per download id, in bytes/second. */
     val speeds: StateFlow<Map<Long, Long>> = _speeds
+
+    @Volatile
+    private var speedLimitBytesPerSecond: Long = 0L
+
+    @Volatile
+    private var schedule = DownloadSchedule()
+
+    init {
+        // Both settings are read once and kept current, so a running download
+        // picks up a new cap on its next chunk instead of needing a restart.
+        scope.launch {
+            settings.preferences.collect { preferences ->
+                speedLimitBytesPerSecond = preferences.speedLimitKbps.toLong() * 1024L
+                schedule = DownloadSchedule(
+                    enabled = preferences.scheduleEnabled,
+                    startMinuteOfDay = preferences.scheduleStartMinute,
+                    endMinuteOfDay = preferences.scheduleEndMinute,
+                )
+            }
+        }
+        // Nothing else would notice when a scheduled window opens.
+        scope.launch {
+            while (true) {
+                delay(SCHEDULE_CHECK_MS)
+                if (schedule.enabled) startQueuedInsideWindow()
+            }
+        }
+    }
+
+    private suspend fun startQueuedInsideWindow() {
+        if (!schedule.allows(minuteOfDay())) return
+        dao.observeAll().first()
+            .filter { it.status == DownloadStatus.QUEUED }
+            .forEach { start(it.id) }
+    }
+
+    private fun minuteOfDay(): Int {
+        val calendar = Calendar.getInstance()
+        return calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+    }
 
     fun observeAll() = dao.observeAll()
 
@@ -66,6 +112,8 @@ class DownloadManager @Inject constructor(
 
     fun start(id: Long) {
         if (jobs[id]?.isActive == true) return
+        // Outside the window the item stays queued; the ticker starts it later.
+        if (!schedule.allows(minuteOfDay())) return
         DownloadService.ensureRunning(context)
         jobs[id] = scope.launch {
             runCatching { runDownload(id) }.onFailure { error ->
@@ -109,6 +157,7 @@ class DownloadManager @Inject constructor(
             partCount = entity.segmentCount,
             // Per-range offsets from the previous session; empty means fresh.
             resumeStates = SegmentCodec.decode(entity.segments),
+            bytesPerSecond = speedLimitBytesPerSecond,
         )
 
         var lastPersist = 0L
@@ -176,5 +225,6 @@ class DownloadManager @Inject constructor(
     companion object {
         const val DEFAULT_PARTS = 8
         private const val PERSIST_INTERVAL_MS = 1_000L
+        private const val SCHEDULE_CHECK_MS = 60_000L
     }
 }

@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.Module
@@ -35,6 +36,12 @@ data class UserPreferences(
     val kidsLockPin: String = "",
     /** Salted PBKDF2 hash of the vault PIN; empty until the vault is set up. */
     val vaultPinHash: String = "",
+    /** Download cap in KiB/s; 0 means unlimited. */
+    val speedLimitKbps: Int = 0,
+    /** When on, queued downloads only start inside the window below. */
+    val scheduleEnabled: Boolean = false,
+    val scheduleStartMinute: Int = 23 * 60,
+    val scheduleEndMinute: Int = 6 * 60,
 )
 
 interface SettingsRepository {
@@ -48,6 +55,8 @@ interface SettingsRepository {
     suspend fun setDecoderMode(mode: DecoderMode)
     suspend fun setKidsLockPin(pin: String)
     suspend fun setVaultPinHash(hash: String)
+    suspend fun setSpeedLimitKbps(kbps: Int)
+    suspend fun setDownloadSchedule(enabled: Boolean, startMinute: Int, endMinute: Int)
 }
 
 // A single DataStore instance per process; the delegate enforces that.
@@ -68,6 +77,10 @@ class DataStoreSettingsRepository(
         val DECODER_MODE = stringPreferencesKey("decoder_mode")
         val KIDS_LOCK_PIN = stringPreferencesKey("kids_lock_pin")
         val VAULT_PIN_HASH = stringPreferencesKey("vault_pin_hash")
+        val SPEED_LIMIT_KBPS = intPreferencesKey("speed_limit_kbps")
+        val SCHEDULE_ENABLED = booleanPreferencesKey("schedule_enabled")
+        val SCHEDULE_START = intPreferencesKey("schedule_start_minute")
+        val SCHEDULE_END = intPreferencesKey("schedule_end_minute")
     }
 
     override val preferences: Flow<UserPreferences> = dataStore.data
@@ -84,6 +97,10 @@ class DataStoreSettingsRepository(
                 decoderMode = DecoderMode.fromStorage(prefs[Keys.DECODER_MODE]),
                 kidsLockPin = prefs[Keys.KIDS_LOCK_PIN] ?: "",
                 vaultPinHash = prefs[Keys.VAULT_PIN_HASH] ?: "",
+                speedLimitKbps = prefs[Keys.SPEED_LIMIT_KBPS] ?: 0,
+                scheduleEnabled = prefs[Keys.SCHEDULE_ENABLED] ?: false,
+                scheduleStartMinute = prefs[Keys.SCHEDULE_START] ?: 23 * 60,
+                scheduleEndMinute = prefs[Keys.SCHEDULE_END] ?: 6 * 60,
             )
         }
 
@@ -124,6 +141,18 @@ class DataStoreSettingsRepository(
 
     override suspend fun setVaultPinHash(hash: String) {
         dataStore.edit { it[Keys.VAULT_PIN_HASH] = hash }
+    }
+
+    override suspend fun setSpeedLimitKbps(kbps: Int) {
+        dataStore.edit { it[Keys.SPEED_LIMIT_KBPS] = kbps.coerceAtLeast(0) }
+    }
+
+    override suspend fun setDownloadSchedule(enabled: Boolean, startMinute: Int, endMinute: Int) {
+        dataStore.edit {
+            it[Keys.SCHEDULE_ENABLED] = enabled
+            it[Keys.SCHEDULE_START] = startMinute.coerceIn(0, 24 * 60 - 1)
+            it[Keys.SCHEDULE_END] = endMinute.coerceIn(0, 24 * 60 - 1)
+        }
     }
 }
 

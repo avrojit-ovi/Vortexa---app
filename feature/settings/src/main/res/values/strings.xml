@@ -26,4 +26,10 @@
     <string name="settings_online_plugin_failed">%1$s could not be loaded: %2$s</string>
     <string name="settings_online_installed">Plugin added. It will be loaded the next time sources are reloaded.</string>
     <string name="settings_online_refresh">Reload sources</string>
+    <string name="settings_downloads">Downloads</string>
+    <string name="settings_speed_limit">Speed limit</string>
+    <string name="settings_speed_unlimited">Unlimited</string>
+    <string name="settings_speed_value">%1$d KB/s</string>
+    <string name="settings_schedule">Nightly downloads</string>
+    <string name="settings_schedule_summary">Queued downloads only start between %1$s. Running downloads keep going.</string>
 </resources>

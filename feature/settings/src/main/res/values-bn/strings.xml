@@ -26,4 +26,10 @@
     <string name="settings_online_plugin_failed">%1$s লোড হয়নি: %2$s</string>
     <string name="settings_online_installed">প্লাগিন যোগ হয়েছে। সোর্স আবার লোড করলে সক্রিয় হবে।</string>
     <string name="settings_online_refresh">সোর্স আবার লোড করুন</string>
+    <string name="settings_downloads">ডাউনলোড</string>
+    <string name="settings_speed_limit">গতির সীমা</string>
+    <string name="settings_speed_unlimited">আনলিমিটেড</string>
+    <string name="settings_speed_value">%1$d KB/s</string>
+    <string name="settings_schedule">রাতের ডাউনলোড</string>
+    <string name="settings_schedule_summary">কিউতে থাকা ডাউনলোড শুধু %1$s-এর মধ্যে শুরু হয়। চলমান ডাউনলোড চলতেই থাকে।</string>
 </resources>
