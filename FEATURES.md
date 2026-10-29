@@ -76,7 +76,9 @@ WebView can close without breaking sites.
 | Lazy queue for online results, next on end | implemented | MED |
 | Sleep timer (15/30/60 min) | implemented | LOW |
 | Real EQ: platform `AudioEffect`, 5 logical bands, presets, persisted | implemented + unit tests | LOW |
-| Widgets, Android Auto, lyrics, gapless/crossfade, replay gain | planned | LOW |
+| Synced lyrics from a sidecar `.lrc` next to the track, shown in the player | implemented + 8 unit tests | LOW |
+| Gapless between queue items: local playback already hands ExoPlayer one playlist, so formats that carry gapless metadata play without a gap | implemented | LOW |
+| Replay gain (needs tag parsing + a custom audio processor), crossfade (needs a custom sink), home-screen widget, Android Auto | planned | LOW |
 
 ## 8. Online video / music module — active
 | Feature | Status | Risk |

@@ -77,8 +77,10 @@ import com.vortexa.core.common.preferences.DecoderMode
 import com.vortexa.core.playback.PlaybackService
 import com.vortexa.feature.video.R
 import java.io.File
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 
 /**
  * Full-screen player for a downloaded file.
@@ -125,6 +127,7 @@ fun PlayerScreen(
     var subtitleSize by remember { mutableStateOf(SubtitleSize.MEDIUM) }
     var subtitleBackground by remember { mutableStateOf(true) }
     var showPlaybackSettings by remember { mutableStateOf(false) }
+    var lyricLines by remember(path) { mutableStateOf<List<LyricLine>>(emptyList()) }
 
     // Kids lock hides the controls behind a PIN; it is not a security boundary.
     var locked by remember { mutableStateOf(false) }
@@ -225,6 +228,20 @@ fun PlayerScreen(
             delay(if (player.isPlaying) 500L else 1_000L)
         }
     }
+
+    // A sidecar .lrc next to the track: read once, then follow the position.
+    LaunchedEffect(path) {
+        lyricLines = withContext(Dispatchers.IO) {
+            val video = File(path)
+            val name = LyricsFinder.find(path, video.parentFile?.list()?.toList().orEmpty())
+                ?: return@withContext emptyList()
+            val text = runCatching { File(video.parentFile, name).readText() }.getOrNull()
+                ?: return@withContext emptyList()
+            LrcParser.parse(text)
+        }
+    }
+
+    val lyricLine = LyricsPosition.lineAt(lyricLines, positionMs)?.text
 
     // Cues arrive when they become active; this ticker applies the user's delay
     // and keeps the on-screen text in step with it.
@@ -466,6 +483,27 @@ fun PlayerScreen(
                 captionsEnabled = captionsEnabled,
                 onToggleCaptions = toggleCaptions,
                 onOpenSettings = { showPlaybackSettings = true },
+            )
+        }
+
+        if (subtitleLines.isEmpty() && lyricLine != null) {
+            Text(
+                text = lyricLine,
+                color = androidx.compose.ui.graphics.Color.White,
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(
+                        start = 24.dp,
+                        end = 24.dp,
+                        bottom = if (locked) 32.dp else 136.dp,
+                    )
+                    .background(
+                        color = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.45f),
+                        shape = RoundedCornerShape(6.dp),
+                    )
+                    .padding(horizontal = 10.dp, vertical = 4.dp),
             )
         }
 
