@@ -6,12 +6,14 @@ import android.content.Intent
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaController
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionToken
+import com.vortexa.core.common.preferences.DecoderMode
 import com.vortexa.core.common.preferences.SettingsRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -40,11 +42,18 @@ class PlaybackService : MediaSessionService() {
     private var session: MediaSession? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var sleepTimer: Job? = null
+    private val codecSelector = DecoderCodecSelector()
 
     override fun onCreate() {
         super.onCreate()
 
-        val exoPlayer = ExoPlayer.Builder(this)
+        // The selector is shared with the settings collector below, so a switch
+        // to software decoding is picked up by the next track the player opens.
+        val renderers = DefaultRenderersFactory(this)
+            .setEnableDecoderFallback(true)
+            .setMediaCodecSelector(codecSelector)
+
+        val exoPlayer = ExoPlayer.Builder(this, renderers)
             .setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(C.USAGE_MEDIA)
@@ -81,6 +90,7 @@ class PlaybackService : MediaSessionService() {
             settings.preferences.collect { preferences ->
                 eqEnabled = preferences.equalizerEnabled
                 eqBands = preferences.equalizerBands
+                codecSelector.preferSoftware = preferences.decoderMode == DecoderMode.SOFTWARE
                 equalizer.attach(exoPlayer.audioSessionId)
                 equalizer.apply(eqEnabled, EqualizerProfile.decode(eqBands))
             }

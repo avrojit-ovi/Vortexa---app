@@ -29,6 +29,10 @@ data class UserPreferences(
     val equalizerBands: String = "",
     /** Browser ad/tracker blocking. On by default: it is the point of the browser. */
     val blockAds: Boolean = true,
+    /** Hardware decoding unless the user asks for software — see [DecoderMode]. */
+    val decoderMode: DecoderMode = DecoderMode.AUTO,
+    /** Four digits that unlock a player the user locked for a child. Not a secret store. */
+    val kidsLockPin: String = "",
 )
 
 interface SettingsRepository {
@@ -39,6 +43,8 @@ interface SettingsRepository {
     suspend fun setOnlineSourcesEnabled(enabled: Boolean)
     suspend fun setEqualizer(enabled: Boolean, bands: String)
     suspend fun setBlockAds(enabled: Boolean)
+    suspend fun setDecoderMode(mode: DecoderMode)
+    suspend fun setKidsLockPin(pin: String)
 }
 
 // A single DataStore instance per process; the delegate enforces that.
@@ -56,6 +62,8 @@ class DataStoreSettingsRepository(
         val EQUALIZER_ENABLED = booleanPreferencesKey("equalizer_enabled")
         val EQUALIZER_BANDS = stringPreferencesKey("equalizer_bands")
         val BLOCK_ADS = booleanPreferencesKey("block_ads")
+        val DECODER_MODE = stringPreferencesKey("decoder_mode")
+        val KIDS_LOCK_PIN = stringPreferencesKey("kids_lock_pin")
     }
 
     override val preferences: Flow<UserPreferences> = dataStore.data
@@ -69,6 +77,8 @@ class DataStoreSettingsRepository(
                 equalizerEnabled = prefs[Keys.EQUALIZER_ENABLED] ?: false,
                 equalizerBands = prefs[Keys.EQUALIZER_BANDS] ?: "",
                 blockAds = prefs[Keys.BLOCK_ADS] ?: true,
+                decoderMode = DecoderMode.fromStorage(prefs[Keys.DECODER_MODE]),
+                kidsLockPin = prefs[Keys.KIDS_LOCK_PIN] ?: "",
             )
         }
 
@@ -97,6 +107,14 @@ class DataStoreSettingsRepository(
 
     override suspend fun setBlockAds(enabled: Boolean) {
         dataStore.edit { it[Keys.BLOCK_ADS] = enabled }
+    }
+
+    override suspend fun setDecoderMode(mode: DecoderMode) {
+        dataStore.edit { it[Keys.DECODER_MODE] = mode.name }
+    }
+
+    override suspend fun setKidsLockPin(pin: String) {
+        dataStore.edit { it[Keys.KIDS_LOCK_PIN] = pin }
     }
 }
 

@@ -63,7 +63,9 @@ WebView can close without breaking sites.
 | Speed presets, fit/fill, ±10 s seek, picture-in-picture | implemented | LOW |
 | Sidecar subtitles (`movie.srt`, `movie.en.srt`, `movie.bn.ass`) + CC on/off | implemented + 5 unit tests | LOW |
 | Gestures: horizontal swipe seeks, left half = brightness, right half = volume, with a HUD | implemented + 8 unit tests | LOW |
-| Subtitle styling/delay, decoder switch, Kids Lock | planned | LOW |
+| Subtitles drawn by Compose: three sizes, background on/off, +0…10 s delay (positive only — a negative shift needs the whole file) | implemented + 7 unit tests | LOW |
+| Kids Lock: hides controls and gestures behind a 4-digit PIN, blocks back, subtitles keep showing | implemented + 3 unit tests | LOW |
+| Decoder switch (hardware / software) — selector picks software first when asked; takes effect on the next video, because Media3 cannot re-init codecs on a live player | implemented | MED |
 
 ## 7. Music — active
 | Feature | Status | Risk |

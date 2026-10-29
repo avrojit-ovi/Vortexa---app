@@ -1,19 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="library_title">এই ডিভাইসে</string>
-    <string name="library_refresh">আবার স্ক্যান করুন</string>
-    <string name="library_empty_title">এখনো কিছু নেই</string>
-    <string name="library_empty_body">ডাউনলোড শেষ হলে ফাইল এখানে নিজে থেকেই দেখা যাবে। শুরু করতে Downloads ট্যাবে একটা লিংক দিন।</string>
+    <string name="library_refresh">ডাউনলোড আবার স্ক্যান করুন</string>
+    <string name="library_empty_title">এখনো দেখানোর মতো কিছু নেই</string>
+    <string name="library_empty_body">ডাউনলোড শেষ হলে এখানে নিজেই এসে যাবে। শুরু করতে Downloads ট্যাবে একটা লিংক দিন।</string>
 
     <string name="player_back">ফিরে যান</string>
     <string name="player_pip">পিকচার ইন পিকচার</string>
     <string name="player_play">চালান</string>
     <string name="player_pause">থামান</string>
-    <string name="player_rewind">%1$d সেকেন্ড পেছনে</string>
+    <string name="player_rewind">%1$d সেকেন্ড পিছনে</string>
     <string name="player_forward">%1$d সেকেন্ড সামনে</string>
-    <string name="player_aspect_fill">স্ক্রিন ভরাট</string>
-    <string name="player_aspect_fit">পুরোটা দেখান</string>
+    <string name="player_aspect_fill">পুরো স্ক্রিন</string>
+    <string name="player_aspect_fit">স্ক্রিনে মানানসই</string>
 
-    <string name="player_captions_on">সাবটাইটেল বন্ধ করুন</string>
-    <string name="player_captions_off">সাবটাইটেল চালু করুন</string>
+    <string name="player_captions_on">সাবটাইটেল চালু</string>
+    <string name="player_captions_off">সাবটাইটেল বন্ধ</string>
+
+    <string name="player_settings">সেটিংস</string>
+    <string name="player_settings_title">সাবটাইটেল ও ডিকোডিং</string>
+    <string name="player_subtitle_delay">সাবটাইটেল ডিলে</string>
+    <string name="player_subtitle_size">সাবটাইটেলের আকার</string>
+    <string name="player_subtitle_background">সাবটাইটেলের ব্যাকগ্রাউন্ড</string>
+    <string name="player_software_decoding">সফটওয়্যার ডিকোডিং</string>
+    <string name="player_software_decoding_note">ফাইল আটকে গেলে বা সবুজ দাগ দেখালে এটা চালু করুন। পরের ভিডিও থেকে কাজ করবে।</string>
+
+    <string name="player_lock">বাচ্চার জন্য লক করুন</string>
+    <string name="player_locked">লক করা · আনলক করতে ট্যাপ করুন</string>
+    <string name="player_unlock_title">৪ সংখ্যার PIN দিন</string>
+    <string name="player_pin_title">৪ সংখ্যার একটা PIN বেছে নিন</string>
+    <string name="player_pin_label">PIN</string>
+    <string name="player_pin_invalid">PIN অবশ্যই চার সংখ্যার হতে হবে</string>
+    <string name="player_pin_mismatch">PIN মেলেনি</string>
+    <string name="player_ok">ঠিক আছে</string>
+    <string name="player_cancel">বাতিল</string>
 </resources>
