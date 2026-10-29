@@ -1,9 +1,11 @@
 package com.vortexa.app
 
 import android.Manifest
+import android.app.PictureInPictureParams
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Rational
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -37,6 +39,19 @@ class MainActivity : ComponentActivity() {
                 VortexaApp()
             }
         }
+    }
+
+    /**
+     * Enters picture-in-picture for the player. Silently does nothing on a
+     * device or window that cannot host it, so the player button never crashes.
+     */
+    fun enterPip() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) return
+        val params = PictureInPictureParams.Builder()
+            .setAspectRatio(Rational(16, 9))
+            .build()
+        runCatching { enterPictureInPictureMode(params) }
     }
 
     /** Android 13+ hides foreground-service notifications until this is granted. */

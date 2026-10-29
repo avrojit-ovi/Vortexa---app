@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_title">ভিডিও</string>
-    <string name="feature_description">গেস্চার, ডিকোডার সুইচ আর সাবটাইটেল সহ MX-স্টাইল প্লেয়ার Phase 6-এ আসবে।</string>
-    <string name="feature_phase">Phase 6</string>
+    <string name="library_title">এই ডিভাইসে</string>
+    <string name="library_refresh">আবার স্ক্যান করুন</string>
+    <string name="library_empty_title">এখনো কিছু নেই</string>
+    <string name="library_empty_body">ডাউনলোড শেষ হলে ফাইল এখানে নিজে থেকেই দেখা যাবে। শুরু করতে Downloads ট্যাবে একটা লিংক দিন।</string>
+
+    <string name="player_back">ফিরে যান</string>
+    <string name="player_pip">পিকচার ইন পিকচার</string>
+    <string name="player_play">চালান</string>
+    <string name="player_pause">থামান</string>
+    <string name="player_rewind">%1$d সেকেন্ড পেছনে</string>
+    <string name="player_forward">%1$d সেকেন্ড সামনে</string>
+    <string name="player_aspect_fill">স্ক্রিন ভরাট</string>
+    <string name="player_aspect_fit">পুরোটা দেখান</string>
+
+    <string name="playback_channel_name">প্লেব্যাক</string>
 </resources>

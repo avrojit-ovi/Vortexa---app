@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_title">Video</string>
-    <string name="feature_description">MX-style player with gestures, decoder switching and subtitles arrives in phase 6.</string>
-    <string name="feature_phase">Phase 6</string>
+    <string name="library_title">On this device</string>
+    <string name="library_refresh">Rescan downloads</string>
+    <string name="library_empty_title">Nothing to play yet</string>
+    <string name="library_empty_body">Finished downloads appear here automatically. Add a link on the Downloads tab to get started.</string>
+
+    <string name="player_back">Back</string>
+    <string name="player_pip">Picture in picture</string>
+    <string name="player_play">Play</string>
+    <string name="player_pause">Pause</string>
+    <string name="player_rewind">Back %1$d seconds</string>
+    <string name="player_forward">Forward %1$d seconds</string>
+    <string name="player_aspect_fill">Fill screen</string>
+    <string name="player_aspect_fit">Fit screen</string>
+
+    <string name="playback_channel_name">Playback</string>
 </resources>

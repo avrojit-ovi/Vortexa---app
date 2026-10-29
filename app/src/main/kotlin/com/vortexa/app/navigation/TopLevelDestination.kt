@@ -1,5 +1,6 @@
 package com.vortexa.app.navigation
 
+import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.vortexa.app.R
@@ -23,4 +24,11 @@ enum class TopLevelDestination(
 object Routes {
     const val VAULT = "vault"
     const val SETTINGS = "settings"
+
+    /** Full-screen player; the shell hides its bars while this is on top. */
+    const val PLAYER_PREFIX = "player"
+    const val PLAYER = "$PLAYER_PREFIX?path={path}&title={title}"
+
+    fun player(path: String, title: String): String =
+        "$PLAYER_PREFIX?path=${Uri.encode(path)}&title=${Uri.encode(title)}"
 }

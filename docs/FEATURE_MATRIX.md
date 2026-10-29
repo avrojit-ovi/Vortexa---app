@@ -23,11 +23,15 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · ⛔ not built on purpose
 ## Video (phase 6)
 | Feature | Status |
 |---|---|
-| Media3 player, HW/HW+/SW switch | ⏳ |
-| Gestures, PiP, background audio, Kids Lock | ⏳ |
-| Subtitle formats + styling + delay | ⏳ |
+| Library of downloaded media (files on disk, not a second table) | ✅ |
+| Media3 ExoPlayer in a `MediaSessionService`: keeps playing when the screen closes, notification + headset keys | ✅ |
+| Resume where you stopped (per-file, credits guard) | ✅ |
+| Speed presets, fit/fill, ±10 s, PiP | ✅ |
+| HW/HW+/SW decoder switch, Kids Lock | ⏳ |
+| Gestures (brightness/volume/seek), subtitle formats + styling + delay | ⏳ |
 
-## Music (phase 7)
+## Music (phase 7) — planned next
+
 | Feature | Status |
 |---|---|
 | Media3 playback, gapless, crossfade, replay gain | ⏳ |
@@ -44,3 +48,4 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · ⛔ not built on purpose
 | Vault, unified search, mini-player (phase 8) | ⏳ |
 | Online Video module, opt-in (phase 9) | ⏳ |
 | YouTube ad bypass / background play / download | ⛔ |
+| YouTube / YouTube Music stream extraction or audio-only playback of YouTube content | ⛔ (breaks YouTube's terms; deep links to the official app only) |

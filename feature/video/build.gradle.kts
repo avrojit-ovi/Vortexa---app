@@ -22,9 +22,16 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
 
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
+    implementation(libs.media3.session)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+
+    testImplementation(libs.junit)
 }
