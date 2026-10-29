@@ -95,7 +95,13 @@ fun VortexaApp(modifier: Modifier = Modifier) {
             },
         ) {
             composable(TopLevelDestination.DOWNLOADS.route) { DownloadsScreen() }
-            composable(TopLevelDestination.BROWSER.route) { BrowserScreen() }
+            composable(TopLevelDestination.BROWSER.route) {
+                BrowserScreen(
+                    onOpenEmbed = { url, title ->
+                        navController.navigate(Routes.embed(url, title))
+                    },
+                )
+            }
             composable(TopLevelDestination.VIDEO.route) {
                 VideoScreen(
                     onOpen = { path, title ->

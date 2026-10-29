@@ -40,12 +40,19 @@ Distribution: GitHub Releases + F-Droid only.
 | HLS/DASH download, FFmpeg (LGPL build) merge | planned | MED |
 | Per-protocol engine selection + unified queue | planned | MED |
 
-## 5. Browser · planned
+## 5. Browser · active
 | Feature | Status | Risk |
 |---|---|---|
-| Multi-tab WebView, incognito, bookmarks, history | planned | LOW |
-| Own adblock engine (EasyList/uBlock syntax parser) | planned | MED |
-| Media sniffer + download hook | planned | MED |
+| Multi-tab WebView (per-tab history via `saveState`, cap 8), URL/search bar, back/forward, tab sheet | implemented + 9 unit tests | LOW |
+| Own adblock engine (EasyList/uBlock subset: `||`, `@@`, wildcards, anchors) + bundled rules, hooked into WebView requests, shield toggle persisted | implemented + 8 unit tests | MED |
+| Media sniffer + download hook: media requests recognised by URL/MIME, direct files go to the download queue, HLS/DASH open in the player | implemented + 5 unit tests | MED |
+| Incognito, bookmarks, history | planned | LOW |
+
+**Deliberate limits.** Rules are matched by URL only: cosmetics (`##`), scriptlets,
+regex rules and `$` options are counted and skipped rather than half-applied, so
+the engine never claims coverage it does not have. Third-party cookies are off and
+mixed content is never allowed — the two cheapest real-world tracker paths a
+WebView can close without breaking sites.
 
 ## 6. Player · implemented
 | Feature | Status | Risk |

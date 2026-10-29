@@ -1,6 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_title">Browser</string>
-    <string name="feature_description">Ad-free WebView browser with a media sniffer arrives in phase 5.</string>
-    <string name="feature_phase">Phase 5</string>
+    <string name="browser_url_hint">Search or enter address</string>
+    <string name="browser_back">Back</string>
+    <string name="browser_forward">Forward</string>
+    <string name="browser_reload">Reload</string>
+    <string name="browser_stop">Stop loading</string>
+    <string name="browser_open">Open</string>
+
+    <string name="browser_tabs">Tabs</string>
+    <string name="browser_new_tab">New tab</string>
+    <string name="browser_close_tab">Close tab</string>
+    <plurals name="browser_tab_count">
+        <item quantity="one">%1$d tab</item>
+        <item quantity="other">%1$d tabs</item>
+    </plurals>
+
+    <string name="browser_block_ads_on">Ad and tracker blocking is on</string>
+    <string name="browser_block_ads_off">Ad and tracker blocking is off</string>
+
+    <plurals name="browser_media_found">
+        <item quantity="one">%1$d media found</item>
+        <item quantity="other">%1$d media found</item>
+    </plurals>
+    <string name="browser_media_title">Media on this page</string>
+    <string name="browser_media_note">Files go to Downloads. HLS and DASH playlists open in the player; saving them whole arrives in phase 4.</string>
+    <string name="browser_download">Download</string>
+    <string name="browser_download_started">Download started</string>
+    <string name="browser_download_failed">That link could not be downloaded</string>
+
+    <string name="browser_kind_video">Video</string>
+    <string name="browser_kind_audio">Audio</string>
+    <string name="browser_kind_hls">HLS playlist</string>
+    <string name="browser_kind_dash">DASH manifest</string>
+    <string name="browser_kind_file">File</string>
 </resources>

@@ -1,6 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_title">ব্রাউজার</string>
-    <string name="feature_description">বিজ্ঞাপন-মুক্ত WebView ব্রাউজার আর মিডিয়া স্নিফার Phase 5-এ আসবে।</string>
-    <string name="feature_phase">Phase 5</string>
+    <string name="browser_url_hint">খুঁজুন বা ঠিকানা লিখুন</string>
+    <string name="browser_back">পিছনে</string>
+    <string name="browser_forward">সামনে</string>
+    <string name="browser_reload">রিলোড</string>
+    <string name="browser_stop">লোড হওয়া থামান</string>
+    <string name="browser_open">খুলুন</string>
+
+    <string name="browser_tabs">ট্যাব</string>
+    <string name="browser_new_tab">নতুন ট্যাব</string>
+    <string name="browser_close_tab">ট্যাব বন্ধ</string>
+    <plurals name="browser_tab_count">
+        <item quantity="one">%1$dটি ট্যাব</item>
+        <item quantity="other">%1$dটি ট্যাব</item>
+    </plurals>
+
+    <string name="browser_block_ads_on">বিজ্ঞাপন ও ট্র্যাকার ব্লকিং চালু</string>
+    <string name="browser_block_ads_off">বিজ্ঞাপন ও ট্র্যাকার ব্লকিং বন্ধ</string>
+
+    <plurals name="browser_media_found">
+        <item quantity="one">%1$dটি মিডিয়া পাওয়া গেছে</item>
+        <item quantity="other">%1$dটি মিডিয়া পাওয়া গেছে</item>
+    </plurals>
+    <string name="browser_media_title">এই পাতার মিডিয়া</string>
+    <string name="browser_media_note">ফাইল Downloads-এ যায়। HLS আর DASH প্লেলিস্ট প্লেয়ারে খোলে; পুরোটা সেভ করা Phase 4-এ আসবে।</string>
+    <string name="browser_download">ডাউনলোড</string>
+    <string name="browser_download_started">ডাউনলোড শুরু হয়েছে</string>
+    <string name="browser_download_failed">এই লিংকটা ডাউনলোড করা গেল না</string>
+
+    <string name="browser_kind_video">ভিডিও</string>
+    <string name="browser_kind_audio">অডিও</string>
+    <string name="browser_kind_hls">HLS প্লেলিস্ট</string>
+    <string name="browser_kind_dash">DASH ম্যানিফেস্ট</string>
+    <string name="browser_kind_file">ফাইল</string>
 </resources>

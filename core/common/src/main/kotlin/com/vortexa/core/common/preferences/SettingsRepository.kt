@@ -27,6 +27,8 @@ data class UserPreferences(
     /** Equalizer switch and per-band gains in millibels, CSV: "-300,0,200,0,-100". */
     val equalizerEnabled: Boolean = false,
     val equalizerBands: String = "",
+    /** Browser ad/tracker blocking. On by default: it is the point of the browser. */
+    val blockAds: Boolean = true,
 )
 
 interface SettingsRepository {
@@ -36,6 +38,7 @@ interface SettingsRepository {
     suspend fun setLanguageTag(tag: String)
     suspend fun setOnlineSourcesEnabled(enabled: Boolean)
     suspend fun setEqualizer(enabled: Boolean, bands: String)
+    suspend fun setBlockAds(enabled: Boolean)
 }
 
 // A single DataStore instance per process; the delegate enforces that.
@@ -52,6 +55,7 @@ class DataStoreSettingsRepository(
         val ONLINE_SOURCES = booleanPreferencesKey("online_sources_enabled")
         val EQUALIZER_ENABLED = booleanPreferencesKey("equalizer_enabled")
         val EQUALIZER_BANDS = stringPreferencesKey("equalizer_bands")
+        val BLOCK_ADS = booleanPreferencesKey("block_ads")
     }
 
     override val preferences: Flow<UserPreferences> = dataStore.data
@@ -64,6 +68,7 @@ class DataStoreSettingsRepository(
                 onlineSourcesEnabled = prefs[Keys.ONLINE_SOURCES] ?: false,
                 equalizerEnabled = prefs[Keys.EQUALIZER_ENABLED] ?: false,
                 equalizerBands = prefs[Keys.EQUALIZER_BANDS] ?: "",
+                blockAds = prefs[Keys.BLOCK_ADS] ?: true,
             )
         }
 
@@ -88,6 +93,10 @@ class DataStoreSettingsRepository(
             it[Keys.EQUALIZER_ENABLED] = enabled
             it[Keys.EQUALIZER_BANDS] = bands
         }
+    }
+
+    override suspend fun setBlockAds(enabled: Boolean) {
+        dataStore.edit { it[Keys.BLOCK_ADS] = enabled }
     }
 }
 
