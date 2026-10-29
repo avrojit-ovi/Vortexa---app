@@ -44,12 +44,13 @@ interface DownloadDao {
     )
 
     @Query(
-        "UPDATE downloads SET file_name = :fileName, total_bytes = :total, etag = :etag, " +
-            "last_modified = :lastModified, updated_at = :timestamp WHERE id = :id",
+        "UPDATE downloads SET file_name = :fileName, mime_type = :mimeType, total_bytes = :total, " +
+            "etag = :etag, last_modified = :lastModified, updated_at = :timestamp WHERE id = :id",
     )
     suspend fun updateMetadata(
         id: Long,
         fileName: String,
+        mimeType: String?,
         total: Long,
         etag: String?,
         lastModified: String?,

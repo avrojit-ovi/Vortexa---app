@@ -12,10 +12,14 @@
     <string name="downloads_add_hint">https://example.com/file.zip</string>
     <string name="downloads_add_confirm">ডাউনলোড</string>
     <string name="downloads_add_invalid">এটা http(s) লিংক মনে হচ্ছে না।</string>
+    <string name="downloads_add_batch_hint">প্রতি লাইনে একটি লিংক — পেস্ট করা লিস্ট একসাথে সারিতে যাবে।</string>
+    <string name="downloads_clipboard_title">ক্লিপবোর্ডে একটি লিংক আছে</string>
+    <string name="downloads_clipboard_add">যোগ করুন</string>
 
     <string name="action_pause">বিরতি</string>
     <string name="action_resume">চালু করুন</string>
     <string name="action_cancel">সরান</string>
+    <string name="action_dismiss">এখন না</string>
 
     <string name="status_queued">সারিতে আছে</string>
     <string name="status_running">শুরু হচ্ছে…</string>
@@ -30,4 +34,13 @@
         <item quantity="one">%1$d টি ডাউনলোড চলছে</item>
         <item quantity="other">%1$d টি ডাউনলোড চলছে</item>
     </plurals>
+    <string name="downloads_category_all">সব</string>
+    <string name="downloads_category_empty">এই ক্যাটাগরিতে এখনো কিছু নেই।</string>
+    <string name="downloads_cat_video">ভিডিও</string>
+    <string name="downloads_cat_audio">অডিও</string>
+    <string name="downloads_cat_image">ছবি</string>
+    <string name="downloads_cat_document">ডকুমেন্ট</string>
+    <string name="downloads_cat_app">অ্যাপ</string>
+    <string name="downloads_cat_archive">আর্কাইভ</string>
+    <string name="downloads_cat_other">অন্যান্য</string>
 </resources>

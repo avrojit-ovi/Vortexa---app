@@ -33,7 +33,10 @@ Distribution: GitHub Releases + F-Droid only.
 | Room v1→v2 migration (existing installs keep their data) | done | LOW |
 | Speed limiter: one byte budget per download shared by every range, read from settings | implemented + 6 unit tests | LOW |
 | Daily schedule: queued downloads only start inside the window (cross-midnight supported), checked every minute | implemented + 5 unit tests | LOW |
-| Proxy/auth, categories, SD-card (SAF), batch import | planned | LOW |
+| Category chips: name first, server MIME type (stored from the response) as fallback; a filter that loses its last row falls back to All | implemented + 10 unit tests | LOW |
+| Batch add: a pasted list (one link per line, or space/comma separated) is parsed, de-duplicated and queued; unusable tokens are skipped | implemented + 8 unit tests | LOW |
+| Clipboard offer: a copied http(s) link appears as a one-tap banner, hidden again while that link is already queued | implemented | LOW |
+| Proxy/auth, SD-card (SAF), custom folder, expired-link refresh, mirror URLs | planned | LOW |
 
 ## 4. Torrent + adaptive download · planned
 | Feature | Status | Risk |

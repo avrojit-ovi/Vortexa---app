@@ -43,6 +43,8 @@ adb install vortexa-0.2.0-release.apk
 - **Five-tab shell** — Downloads · Browser · Video · Music · More, with SlidingContent transitions.
 - **Settings that actually work** — theme mode and dynamic colour persist in DataStore and repaint the app instantly.
 - **Working download screen** — add a link, watch live progress and speed, pause/resume/remove. The queue lives in an application-scoped coroutine owner, so changing screens never cancels a transfer.
+- **Download categories** — chips filter the queue by file type (the name first, the server's MIME type as fallback). A filter that loses its last row falls back to All instead of hiding the list behind a chip that no longer exists.
+- **Add one link or a list** — the dialog takes a pasted batch (one link per line), drops duplicates, caps the batch and queues it together; a link already on the clipboard is offered as a one-tap banner.
 - **Segmented download engine** — range probing, parallel ranged download, progress flow with live speed, retry, checksum (SHA-256/MD5/SHA-1).
 - **Crash-safe resume** — per-range offsets (`start-end:downloaded;…`) are persisted in Room every second, and a migration carries v1 databases forward.
 - **A neutral online layer** — the Music tab can play a direct link (file, HLS or DASH) out of the box, and optional extractor plugins you install yourself plug into the same session, so background playback and lock-screen controls behave identically. Off by default, isolated so a broken plugin cannot crash the app. Contract: [docs/PLUGIN_API.md](docs/PLUGIN_API.md).
@@ -50,12 +52,12 @@ adb install vortexa-0.2.0-release.apk
 - **Downloads survive leaving the app** — a `dataSync` foreground service keeps the process alive with one aggregate notification (progress, speed, "Pause all") and stops itself the moment nothing is running.
 - **Rust core** — range planning, resume decisions and streaming hashes, 21 unit tests, same test vectors as the Kotlin planner.
 - **English + বাংলা** localisation, edge-to-edge, adaptive icon, RTL-ready.
-- **29 JVM tests + 21 Rust tests**, Android Lint clean (0 errors).
+- **188 JVM tests + 21 Rust tests**, Android Lint clean (0 errors).
 
 Download engine tests run against a **real local HTTP server** (sockets, `206 Partial Content`, ETag, 500-then-200), not mocks:
 
 ```bash
-./gradlew :feature:downloader:testDebugUnitTest   # 16 tests
+./gradlew :feature:downloader:testDebugUnitTest   # 49 tests
 cd rust/download-core && cargo test               # 21 tests
 ```
 

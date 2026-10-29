@@ -78,6 +78,14 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    lint {
+        // On Windows local.properties holds the SDK path as `C\:\\Users\\...`, the exact
+        // form Android Studio writes. Properties reads it correctly, but the
+        // PropertyEscape check reports that escape sequence as an error, so the lint
+        // gate would fail on Windows only. Linux CI has no local.properties at all.
+        disable += "PropertyEscape"
+    }
+
     packaging {
         resources.excludes += setOf(
             "/META-INF/{AL2.0,LGPL2.1}",

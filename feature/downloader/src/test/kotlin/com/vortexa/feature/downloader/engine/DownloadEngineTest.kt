@@ -42,7 +42,18 @@ class DownloadEngineTest {
             assertEquals("\"v1\"", metadata.etag)
             assertEquals("Wed, 21 Oct 2026 07:28:00 GMT", metadata.lastModified)
             assertEquals("file.bin", metadata.suggestedFileName)
+            assertEquals("application/octet-stream", metadata.contentType)
         }
+    }
+
+    @Test
+    fun `probe keeps the server content type for category grouping`() = runTest {
+        TestHttpServer(content = payload(1_000), contentType = "video/mp4; codecs=avc1")
+            .start()
+            .use { server ->
+                // The manager strips the parameters before it stores the value.
+                assertEquals("video/mp4; codecs=avc1", engine().probe(server.url).contentType)
+            }
     }
 
     @Test

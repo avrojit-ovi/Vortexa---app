@@ -11,7 +11,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · ⛔ not built on purpose
 | Retry with exponential backoff | ✅  ·  queue, speed limiter, proxy/auth ⏳ |
 | Foreground service (dataSync) + aggregate notification with Pause all | ✅ |
 | Torrent (jlibtorrent), HLS/DASH, FFmpeg merge | ⏳ |
-| Checksums (SHA-256 / MD5 / SHA-1, streaming) | ✅  ·  categories, SD-card ⏳ |
+| Checksums (SHA-256 / MD5 / SHA-1, streaming) | ✅  ·  categories ✅ · SD-card ⏳ |
 
 ## Browser (phase 5)
 | Feature | Status |

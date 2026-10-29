@@ -171,6 +171,10 @@ class DownloadManager @Inject constructor(
                     dao.updateMetadata(
                         id = id,
                         fileName = name,
+                        // Stored so the UI can group a download whose name says nothing
+                        // (`download.bin`) by what the server called it.
+                        mimeType = event.metadata.contentType?.substringBefore(';')?.trim()
+                            ?.takeIf { it.isNotEmpty() },
                         total = event.metadata.totalBytes,
                         etag = event.metadata.etag,
                         lastModified = event.metadata.lastModified,

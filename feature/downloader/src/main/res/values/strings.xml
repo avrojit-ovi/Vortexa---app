@@ -12,10 +12,14 @@
     <string name="downloads_add_hint">https://example.com/file.zip</string>
     <string name="downloads_add_confirm">Download</string>
     <string name="downloads_add_invalid">That does not look like an http(s) link.</string>
+    <string name="downloads_add_batch_hint">One link per line — a pasted list is queued together.</string>
+    <string name="downloads_clipboard_title">Link on your clipboard</string>
+    <string name="downloads_clipboard_add">Add</string>
 
     <string name="action_pause">Pause</string>
     <string name="action_resume">Resume</string>
     <string name="action_cancel">Remove</string>
+    <string name="action_dismiss">Not now</string>
 
     <string name="status_queued">Queued</string>
     <string name="status_running">Starting…</string>
@@ -30,4 +34,13 @@
         <item quantity="one">%1$d download in progress</item>
         <item quantity="other">%1$d downloads in progress</item>
     </plurals>
+    <string name="downloads_category_all">All</string>
+    <string name="downloads_category_empty">Nothing in this category yet.</string>
+    <string name="downloads_cat_video">Video</string>
+    <string name="downloads_cat_audio">Audio</string>
+    <string name="downloads_cat_image">Images</string>
+    <string name="downloads_cat_document">Documents</string>
+    <string name="downloads_cat_app">Apps</string>
+    <string name="downloads_cat_archive">Archives</string>
+    <string name="downloads_cat_other">Other</string>
 </resources>
