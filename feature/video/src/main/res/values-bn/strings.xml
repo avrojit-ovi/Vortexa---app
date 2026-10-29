@@ -14,4 +14,6 @@
     <string name="player_aspect_fill">স্ক্রিন ভরাট</string>
     <string name="player_aspect_fit">পুরোটা দেখান</string>
 
+    <string name="player_captions_on">সাবটাইটেল বন্ধ করুন</string>
+    <string name="player_captions_off">সাবটাইটেল চালু করুন</string>
 </resources>

@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -85,6 +86,8 @@ fun PlayerScreen(
     var scrubbing by remember { mutableStateOf<Float?>(null) }
     var speed by remember { mutableStateOf(SpeedPresets.DEFAULT) }
     var zoomed by remember { mutableStateOf(false) }
+    var captionsEnabled by remember { mutableStateOf(false) }
+    var subtitlesPresent by remember(path) { mutableStateOf(false) }
 
     BackHandler(onBack = onBack)
 
@@ -96,9 +99,23 @@ fun PlayerScreen(
                 runCatching { future.get() }.onSuccess { connected ->
                     val saved = positions.lastPosition(path)
                     val startAt = if (saved >= ResumePolicy.MIN_RESUME_MS) saved else 0L
+                    val videoFile = File(path)
+                    // Sidecar subtitles: movie.srt, movie.en.srt, movie.bn.ass ...
+                    val subtitles = SubtitleFinder.match(
+                        videoPath = path,
+                        candidates = videoFile.parentFile?.list()?.toList().orEmpty(),
+                    )
+                    val subtitleConfigs = subtitles.map { subtitle ->
+                        MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(File(subtitle.path)))
+                            .setMimeType(subtitle.mimeType)
+                            .setLanguage(subtitle.language)
+                            .setLabel(subtitle.label)
+                            .build()
+                    }
                     connected.setMediaItem(
                         MediaItem.Builder()
-                            .setUri(Uri.fromFile(File(path)))
+                            .setUri(Uri.fromFile(videoFile))
+                            .setSubtitleConfigurations(subtitleConfigs)
                             .setMediaMetadata(
                                 androidx.media3.common.MediaMetadata.Builder()
                                     .setTitle(title)
@@ -107,6 +124,7 @@ fun PlayerScreen(
                             .build(),
                         startAt,
                     )
+                    subtitlesPresent = subtitleConfigs.isNotEmpty()
                     connected.prepare()
                     connected.playWhenReady = true
                     controller = connected
@@ -238,6 +256,17 @@ fun PlayerScreen(
                     speed = next
                 },
                 onToggleZoom = { zoomed = !zoomed },
+                captionsAvailable = subtitlesPresent,
+                captionsEnabled = captionsEnabled,
+                onToggleCaptions = {
+                    captionsEnabled = !captionsEnabled
+                    controller?.let { player ->
+                        player.trackSelectionParameters = player.trackSelectionParameters
+                            .buildUpon()
+                            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, !captionsEnabled)
+                            .build()
+                    }
+                },
             )
         }
     }
@@ -295,6 +324,9 @@ private fun PlayerTransport(
     onSeekBy: (Long) -> Unit,
     onToggleSpeed: () -> Unit,
     onToggleZoom: () -> Unit,
+    captionsAvailable: Boolean,
+    captionsEnabled: Boolean,
+    onToggleCaptions: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
         val fraction = when {
@@ -385,6 +417,20 @@ private fun PlayerTransport(
                     ),
                     color = androidx.compose.ui.graphics.Color.White,
                 )
+            }
+            if (captionsAvailable) {
+                TextButton(onClick = onToggleCaptions) {
+                    Text(
+                        text = stringResource(
+                            if (captionsEnabled) R.string.player_captions_on else R.string.player_captions_off,
+                        ),
+                        color = if (captionsEnabled) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            androidx.compose.ui.graphics.Color.White
+                        },
+                    )
+                }
             }
         }
     }

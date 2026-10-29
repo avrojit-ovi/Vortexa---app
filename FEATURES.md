@@ -54,7 +54,8 @@ Distribution: GitHub Releases + F-Droid only.
 | Media3 player in a `MediaSessionService`, background audio + headset keys | implemented | LOW |
 | Resume position per file (credits guard) | implemented + unit tests | LOW |
 | Speed presets, fit/fill, ±10 s seek, picture-in-picture | implemented | LOW |
-| Gestures (brightness/volume/seek), subtitles + styling, decoder switch, Kids Lock | planned | LOW |
+| Sidecar subtitles (`movie.srt`, `movie.en.srt`, `movie.bn.ass`) + CC on/off | implemented + 5 unit tests | LOW |
+| Gestures (brightness/volume/seek), subtitle styling/delay, decoder switch, Kids Lock | planned | LOW |
 
 ## 7. Music · in progress
 | Feature | Status | Risk |

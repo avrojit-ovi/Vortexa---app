@@ -14,4 +14,6 @@
     <string name="player_aspect_fill">Fill screen</string>
     <string name="player_aspect_fit">Fit screen</string>
 
+    <string name="player_captions_on">CC on</string>
+    <string name="player_captions_off">CC off</string>
 </resources>
