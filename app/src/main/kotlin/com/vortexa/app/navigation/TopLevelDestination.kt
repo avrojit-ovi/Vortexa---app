@@ -31,4 +31,11 @@ object Routes {
 
     fun player(path: String, title: String): String =
         "$PLAYER_PREFIX?path=${Uri.encode(path)}&title=${Uri.encode(title)}"
+
+    /** Official web player, used when a source cannot resolve a stream. */
+    const val EMBED_PREFIX = "embed"
+    const val EMBED = "$EMBED_PREFIX?url={url}&title={title}"
+
+    fun embed(url: String, title: String): String =
+        "$EMBED_PREFIX?url=${Uri.encode(url)}&title=${Uri.encode(title)}"
 }

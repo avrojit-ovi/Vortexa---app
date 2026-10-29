@@ -102,6 +102,7 @@ dependencies {
     implementation(project(":feature:music"))
     implementation(project(":feature:vault"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:onlinevideo"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

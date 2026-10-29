@@ -54,6 +54,9 @@ data class MediaTrack(
     val isLive: Boolean = false,
     /** Filled in by the registry so a result can be traced to its source. */
     val extractorId: String = "",
+
+    /** Official web player for this item, used when resolution fails. */
+    val fallbackUrl: String? = null,
 ) {
     val subtitle: String?
         get() = listOfNotNull(artist, album).firstOrNull()?.takeIf { it.isNotBlank() }

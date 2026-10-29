@@ -65,16 +65,22 @@ Distribution: GitHub Releases + F-Droid only.
 | Real EQ: platform `AudioEffect`, 5 logical bands, presets, persisted | implemented + unit tests | LOW |
 | Local library scan, tags, lyrics, widgets, Android Auto | planned | LOW |
 
-## 8. Online video / music module · UNBLOCKED, next phase
+## 8. Online video / music module — active
 | Feature | Status | Risk |
 |---|---|---|
-| Layer (a) primary: NewPipeExtractor → stream URL → Media3 | planned (next) | HIGH |
-| Layer (b) fallback: WebView + official YouTube IFrame embed, JS bridge | planned (next) | MED |
-| Automatic switch (a)→(b) when (a) throws; app never crashes | planned (next) | HIGH |
-| Layer (c): SponsorBlock API (`sponsor.ajay.app`) | planned | LOW |
-| Layer (c): Return YouTube Dislike API (`returnyoutubedislikeapi.com`) | planned | LOW |
-| Background play of resolved streams (service + session already exist) | implemented infrastructure | HIGH |
-| Opt-in switch in Settings with Bangla caveat | done | — |
+| Layer (a) primary: NewPipeExtractor (`v0.24.8`, JitPack) → stream URL → Media3 | implemented, not device-verified | HIGH |
+| Search in the Music tab (album/artist/duration/thumbnail), results become the play queue | implemented | HIGH |
+| Layer (b) fallback: official YouTube IFrame embed in a WebView (`EmbedPlayerScreen`) | implemented, wired to open automatically when (a) throws | MED |
+| Automatic switch (a)→(b): a failed resolve hands the item's `fallbackUrl` to the shell; no crash | implemented | HIGH |
+| Layer (c): SponsorBlock client + parser (`sponsor.ajay.app`) | client + parser implemented, 3 unit tests; not yet drawn on screen | LOW |
+| Layer (c): Return YouTube Dislike client + parser | client + parser implemented, unit tested; not yet drawn on screen | LOW |
+| Background play of resolved streams via `PlaybackService` (mediaPlayback + MediaSession + notification) | implemented (shared with video/music) | HIGH |
+| Settings toggle + Bangla caveat for online sources | done | — |
+
+**Known gap inside layer (a):** NewPipe needs a JavaScript engine to decipher some
+player signatures. Until that is supplied, some videos resolve to no URL; the
+fallback opens the web player instead of failing. Next step is a Rhino-backed
+`JavaScript` implementation passed to `NewPipe.init`.
 
 ## 9. Vault · planned
 | Feature | Status | Risk |

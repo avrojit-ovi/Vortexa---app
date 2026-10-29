@@ -39,6 +39,9 @@ data class MusicUiState(
     val sleepTimerMinutes: Int? = null,
     val equalizerEnabled: Boolean = false,
     val equalizerBands: List<Int> = EqualizerProfile.flat(),
+    /** Set when extraction failed but an official web player exists. */
+    val fallbackUrl: String? = null,
+    val fallbackTitle: String? = null,
 ) {
     val canSearch: Boolean get() = sourcesEnabled && !searching
 }
@@ -136,7 +139,11 @@ class MusicViewModel @Inject constructor(
             val resolved = online.resolve(track)
             val link = resolved.getOrElse { error ->
                 _state.update {
-                    it.copy(message = error.userText())
+                    it.copy(
+                        message = error.userText(),
+                        fallbackUrl = track.fallbackUrl,
+                        fallbackTitle = track.title,
+                    )
                 }
                 return@launch
             }
@@ -171,6 +178,10 @@ class MusicViewModel @Inject constructor(
             }
             startTicker(player)
         }
+    }
+
+    fun consumeFallback() {
+        _state.update { it.copy(fallbackUrl = null, fallbackTitle = null) }
     }
 
     fun pauseOrResume() {

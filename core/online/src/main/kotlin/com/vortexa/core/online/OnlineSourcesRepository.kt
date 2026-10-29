@@ -50,6 +50,7 @@ data class OnlineSourcesState(
 class OnlineSourcesRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val settings: SettingsRepository,
+    private val builtInSources: Set<@JvmSuppressWildcards BuiltInSourceProvider>,
 ) {
 
     private val host = PluginHost(context)
@@ -111,6 +112,9 @@ class OnlineSourcesRepository @Inject constructor(
 
         val builtIn = DirectLinkExtractor()
         registry.register(builtIn)
+        builtInSources.forEach { provider ->
+            provider.extractors().forEach { registry.register(it) }
+        }
 
         val result = withContext(Dispatchers.IO) { host.loadAll() }
         val origins = mutableMapOf<String, String>()
@@ -127,7 +131,8 @@ class OnlineSourcesRepository @Inject constructor(
                     id = extractor.id,
                     name = extractor.displayName,
                     version = extractor.version,
-                    isBuiltIn = extractor.id == DirectLinkExtractor.ID,
+                    isBuiltIn = extractor.id == DirectLinkExtractor.ID ||
+                        builtInSources.any { provider -> provider.extractors().any { it.id == extractor.id } },
                     pluginFile = origins[extractor.id],
                 )
             },

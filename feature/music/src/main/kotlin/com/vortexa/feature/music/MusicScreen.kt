@@ -29,6 +29,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,11 +58,19 @@ import com.vortexa.core.media.MediaTrack
 @Composable
 fun MusicScreen(
     onOpenSettings: () -> Unit,
+    onOpenEmbed: (url: String, title: String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
     viewModel: MusicViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var showEqualizer by remember { mutableStateOf(false) }
+
+    // Layer (b): extraction failed, so hand the official web player to the shell.
+    LaunchedEffect(state.fallbackUrl) {
+        val url = state.fallbackUrl ?: return@LaunchedEffect
+        onOpenEmbed(url, state.fallbackTitle.orEmpty())
+        viewModel.consumeFallback()
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         if (!state.sourcesEnabled) {

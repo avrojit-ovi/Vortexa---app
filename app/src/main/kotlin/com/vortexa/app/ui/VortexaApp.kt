@@ -35,6 +35,7 @@ import com.vortexa.app.navigation.TopLevelDestination
 import com.vortexa.feature.browser.BrowserScreen
 import com.vortexa.feature.downloader.DownloadsScreen
 import com.vortexa.feature.music.MusicScreen
+import com.vortexa.feature.onlinevideo.EmbedPlayerScreen
 import com.vortexa.feature.settings.SettingsScreen
 import com.vortexa.feature.vault.VaultScreen
 import com.vortexa.feature.video.VideoScreen
@@ -47,7 +48,8 @@ fun VortexaApp(modifier: Modifier = Modifier) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     // The player owns the whole window: no app bar, no tabs, no window insets.
-    val immersive = currentRoute?.startsWith(Routes.PLAYER_PREFIX) == true
+    val immersive = currentRoute?.startsWith(Routes.PLAYER_PREFIX) == true ||
+        currentRoute?.startsWith(Routes.EMBED_PREFIX) == true
 
     Scaffold(
         modifier = modifier,
@@ -102,7 +104,12 @@ fun VortexaApp(modifier: Modifier = Modifier) {
                 )
             }
             composable(TopLevelDestination.MUSIC.route) {
-                MusicScreen(onOpenSettings = { navController.navigate(Routes.SETTINGS) })
+                MusicScreen(
+                    onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                    onOpenEmbed = { url, title ->
+                        navController.navigate(Routes.embed(url, title))
+                    },
+                )
             }
             composable(TopLevelDestination.MORE.route) {
                 MoreScreen(
@@ -112,6 +119,22 @@ fun VortexaApp(modifier: Modifier = Modifier) {
             }
             composable(Routes.VAULT) { VaultScreen() }
             composable(Routes.SETTINGS) { SettingsScreen() }
+            composable(
+                route = Routes.EMBED,
+                arguments = listOf(
+                    navArgument("url") { type = NavType.StringType },
+                    navArgument("title") {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    },
+                ),
+            ) { entry ->
+                EmbedPlayerScreen(
+                    embedUrl = entry.arguments?.getString("url").orEmpty(),
+                    title = entry.arguments?.getString("title").orEmpty(),
+                    onBack = { navController.popBackStack() },
+                )
+            }
             composable(
                 route = Routes.PLAYER,
                 arguments = listOf(
