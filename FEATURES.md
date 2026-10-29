@@ -58,14 +58,16 @@ Distribution: GitHub Releases + F-Droid only.
 | Gestures: horizontal swipe seeks, left half = brightness, right half = volume, with a HUD | implemented + 8 unit tests | LOW |
 | Subtitle styling/delay, decoder switch, Kids Lock | planned | LOW |
 
-## 7. Music · in progress
+## 7. Music — active
 | Feature | Status | Risk |
 |---|---|---|
-| Online search → play through the shared session | implemented | MED |
-| Queue built from search results, resolved lazily, next on end | implemented | MED |
-| Sleep timer (15/30/60 min) in the playback service | implemented | LOW |
+| Local library: scans the download folder for audio, reads title/artist/album/duration | implemented (no storage permission needed) | LOW |
+| Local playback with the whole folder as the queue, through the shared session | implemented | LOW |
+| Online search → play through the same session | implemented | MED |
+| Lazy queue for online results, next on end | implemented | MED |
+| Sleep timer (15/30/60 min) | implemented | LOW |
 | Real EQ: platform `AudioEffect`, 5 logical bands, presets, persisted | implemented + unit tests | LOW |
-| Local library scan, tags, lyrics, widgets, Android Auto | planned | LOW |
+| Widgets, Android Auto, lyrics, gapless/crossfade, replay gain | planned | LOW |
 
 ## 8. Online video / music module — active
 | Feature | Status | Risk |

@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.vortexa.core.playback.EqualizerProfile
+import com.vortexa.feature.music.library.LocalTrack
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vortexa.core.common.format.Formatters
@@ -111,7 +112,26 @@ fun MusicScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        if (state.results.isNotEmpty()) {
+        if (state.query.isBlank() && state.localTracks.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.music_local_library),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp),
+            )
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(bottom = 12.dp),
+            ) {
+                items(state.localTracks, key = { it.path }) { track ->
+                    LocalTrackRow(track = track, onPlay = { viewModel.playLocal(track) })
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 64.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    )
+                }
+            }
+        } else if (state.results.isNotEmpty()) {
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(bottom = 12.dp),
@@ -366,6 +386,45 @@ private fun NowPlayingBar(
 }
 
 @Composable
+private fun LocalTrackRow(track: LocalTrack, onPlay: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = onPlay) {
+            Icon(
+                painter = painterResource(com.vortexa.core.ui.R.drawable.ic_action_play),
+                contentDescription = stringResource(R.string.music_play),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+        Spacer(modifier = Modifier.size(8.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = track.title,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            val details = buildList {
+                track.subtitle?.let(::add)
+                if (track.durationMs > 0L) add(Formatters.duration(track.durationMs / 1000))
+            }
+            if (details.isNotEmpty()) {
+                Text(
+                    text = details.joinToString(" · "),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}
+
 /** 1234 -> 1.2K, 1234567 -> 1.2M, so the counts fit one line. */
 private fun shortCount(value: Long): String = when {
     value >= 1_000_000 -> String.format(java.util.Locale.US, "%.1fM", value / 1_000_000.0)

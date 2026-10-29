@@ -17,6 +17,8 @@ import com.vortexa.core.online.community.SponsorBlockClient
 import com.vortexa.core.online.community.SponsorSegment
 import com.vortexa.core.playback.EqualizerProfile
 import com.vortexa.core.playback.PlaybackService
+import com.vortexa.feature.music.library.LocalMusicLibrary
+import com.vortexa.feature.music.library.LocalTrack
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -50,6 +52,8 @@ data class MusicUiState(
     val sponsorSegments: List<SponsorSegment> = emptyList(),
     val positionMs: Long = 0L,
     val sponsorsSkipped: Int = 0,
+    val localTracks: List<LocalTrack> = emptyList(),
+    val localLoading: Boolean = true,
 ) {
     /** The sponsor segment the playhead is currently inside, if any. */
     val activeSponsorSegment: SponsorSegment?
@@ -76,6 +80,7 @@ class MusicViewModel @Inject constructor(
     private val settings: SettingsRepository,
     private val sponsorBlock: SponsorBlockClient,
     private val dislikes: ReturnYouTubeDislikeClient,
+    private val localLibrary: LocalMusicLibrary,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MusicUiState())
@@ -90,6 +95,7 @@ class MusicViewModel @Inject constructor(
     private var advancing = false
 
     init {
+        refreshLocal()
         viewModelScope.launch {
             settings.preferences.collect { preferences ->
                 _state.update {
@@ -105,6 +111,47 @@ class MusicViewModel @Inject constructor(
             online.state.collect { sources ->
                 _state.update { it.copy(sourcesEnabled = sources.enabled) }
             }
+        }
+    }
+
+    /** Rescans the download folder for audio; cheap and permission-free. */
+    fun refreshLocal() {
+        viewModelScope.launch {
+            val tracks = runCatching { localLibrary.load() }.getOrDefault(emptyList())
+            _state.update { it.copy(localTracks = tracks, localLoading = false) }
+        }
+    }
+
+    /** Local files need no resolution: the whole album becomes the queue at once. */
+    fun playLocal(track: LocalTrack) {
+        val tracks = _state.value.localTracks
+        val index = tracks.indexOfFirst { it.path == track.path }.coerceAtLeast(0)
+        viewModelScope.launch {
+            val player = connect() ?: return@launch
+            val items = tracks.map { local ->
+                MediaItem.Builder()
+                    .setUri(android.net.Uri.fromFile(java.io.File(local.path)))
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setTitle(local.title)
+                            .setArtist(local.artist)
+                            .setAlbumTitle(local.album)
+                            .build(),
+                    )
+                    .build()
+            }
+            player.setMediaItems(items, index, 0L)
+            player.prepare()
+            player.play()
+            _state.update {
+                it.copy(
+                    nowPlayingTitle = track.title,
+                    nowPlayingArtist = track.subtitle,
+                    community = null,
+                    sponsorSegments = emptyList(),
+                )
+            }
+            startTicker(player)
         }
     }
 
