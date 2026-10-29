@@ -13,4 +13,5 @@
     <string name="music_and_audio">অডিও ইফেক্ট</string>
     <string name="music_equalizer_off_hint">চালু করলে প্রতিটা স্ট্রিম আর লোকাল ফাইলের শব্দ এই ব্যান্ড দিয়ে বদলানো যাবে।</string>
     <string name="music_close">বন্ধ করুন</string>
+    <string name="music_skip_sponsor">স্পনসর বাদ দিন</string>
 </resources>

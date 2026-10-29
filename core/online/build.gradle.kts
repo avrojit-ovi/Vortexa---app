@@ -20,10 +20,13 @@ dependencies {
     api(project(":core:media-api"))
     implementation(project(":core:common"))
 
+    implementation(libs.okhttp)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    // org.json is on the Android platform; unit tests need a JVM copy.
+    testImplementation("org.json:json:20240303")
 }

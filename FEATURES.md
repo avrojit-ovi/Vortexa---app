@@ -72,15 +72,17 @@ Distribution: GitHub Releases + F-Droid only.
 | Search in the Music tab (album/artist/duration/thumbnail), results become the play queue | implemented | HIGH |
 | Layer (b) fallback: official YouTube IFrame embed in a WebView (`EmbedPlayerScreen`) | implemented, wired to open automatically when (a) throws | MED |
 | Automatic switch (a)→(b): a failed resolve hands the item's `fallbackUrl` to the shell; no crash | implemented | HIGH |
-| Layer (c): SponsorBlock client + parser (`sponsor.ajay.app`) | client + parser implemented, 3 unit tests; not yet drawn on screen | LOW |
-| Layer (c): Return YouTube Dislike client + parser | client + parser implemented, unit tested; not yet drawn on screen | LOW |
+| Layer (c): SponsorBlock (`sponsor.ajay.app`) — segments + "Skip sponsor" chip while inside one | implemented (client, parser, UI) | LOW |
+| Layer (c): Return YouTube Dislike — like/dislike counts in the player bar | implemented (client, parser, UI) | LOW |
 | Background play of resolved streams via `PlaybackService` (mediaPlayback + MediaSession + notification) | implemented (shared with video/music) | HIGH |
 | Settings toggle + Bangla caveat for online sources | done | — |
 
-**Known gap inside layer (a):** NewPipe needs a JavaScript engine to decipher some
-player signatures. Until that is supplied, some videos resolve to no URL; the
-fallback opens the web player instead of failing. Next step is a Rhino-backed
-`JavaScript` implementation passed to `NewPipe.init`.
+**JavaScript engine (8d): resolved.** NewPipeExtractor `v0.24.8` ships
+`org.mozilla:rhino:1.8.0` as a runtime dependency and its own `JavaScript` helper
+uses Rhino directly, so signature deciphering needs no extra code from us —
+verified on the `debugRuntimeClasspath`. What is still unverified is end-to-end
+resolution on a real device/network; if a video yields no URL the embed fallback
+opens instead of failing.
 
 ## 9. Vault · planned
 | Feature | Status | Risk |

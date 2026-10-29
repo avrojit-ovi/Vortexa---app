@@ -37,6 +37,4 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
-    // org.json is on the Android platform; unit tests need a JVM copy.
-    testImplementation("org.json:json:20240303")
 }

@@ -13,4 +13,5 @@
     <string name="music_and_audio">Audio effects</string>
     <string name="music_equalizer_off_hint">Turn this on to shape the sound of every stream and local file.</string>
     <string name="music_close">Close</string>
+    <string name="music_skip_sponsor">Skip sponsor</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.vortexa.feature.onlinevideo
+package com.vortexa.core.online.community
 
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers

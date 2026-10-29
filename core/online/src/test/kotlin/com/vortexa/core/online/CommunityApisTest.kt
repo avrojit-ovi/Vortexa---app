@@ -1,4 +1,4 @@
-package com.vortexa.feature.onlinevideo
+package com.vortexa.core.online.community
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

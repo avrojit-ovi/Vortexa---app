@@ -131,6 +131,7 @@ fun MusicScreen(
             onTogglePlay = viewModel::pauseOrResume,
             onSleepTimer = viewModel::setSleepTimer,
             onOpenEqualizer = { showEqualizer = true },
+            onSkipSponsor = viewModel::skipActiveSponsor,
         )
     }
 
@@ -288,6 +289,7 @@ private fun NowPlayingBar(
     onTogglePlay: () -> Unit,
     onSleepTimer: (Int?) -> Unit,
     onOpenEqualizer: () -> Unit,
+    onSkipSponsor: () -> Unit,
 ) {
     val title = state.nowPlayingTitle ?: return
     Surface(tonalElevation = 3.dp) {
@@ -325,6 +327,24 @@ private fun NowPlayingBar(
                     }
                 }
             }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                state.community?.let { stats ->
+                    Text(
+                        text = "👍 ${shortCount(stats.likes)}  👎 ${shortCount(stats.dislikes)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (state.activeSponsorSegment != null) {
+                    AssistChip(
+                        onClick = onSkipSponsor,
+                        label = { Text(text = stringResource(R.string.music_skip_sponsor)) },
+                    )
+                }
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(15, 30, 60).forEach { minutes ->
                     AssistChip(
@@ -343,6 +363,14 @@ private fun NowPlayingBar(
             }
         }
     }
+}
+
+@Composable
+/** 1234 -> 1.2K, 1234567 -> 1.2M, so the counts fit one line. */
+private fun shortCount(value: Long): String = when {
+    value >= 1_000_000 -> String.format(java.util.Locale.US, "%.1fM", value / 1_000_000.0)
+    value >= 1_000 -> String.format(java.util.Locale.US, "%.1fK", value / 1_000.0)
+    else -> value.toString()
 }
 
 @Composable

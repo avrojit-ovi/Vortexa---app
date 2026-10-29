@@ -11,6 +11,10 @@ import com.vortexa.core.common.preferences.SettingsRepository
 import com.vortexa.core.media.ExtractorFailure
 import com.vortexa.core.media.MediaTrack
 import com.vortexa.core.online.OnlineSourcesRepository
+import com.vortexa.core.online.community.DislikeStats
+import com.vortexa.core.online.community.ReturnYouTubeDislikeClient
+import com.vortexa.core.online.community.SponsorBlockClient
+import com.vortexa.core.online.community.SponsorSegment
 import com.vortexa.core.playback.EqualizerProfile
 import com.vortexa.core.playback.PlaybackService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,7 +46,18 @@ data class MusicUiState(
     /** Set when extraction failed but an official web player exists. */
     val fallbackUrl: String? = null,
     val fallbackTitle: String? = null,
+    val community: DislikeStats? = null,
+    val sponsorSegments: List<SponsorSegment> = emptyList(),
+    val positionMs: Long = 0L,
+    val sponsorsSkipped: Int = 0,
 ) {
+    /** The sponsor segment the playhead is currently inside, if any. */
+    val activeSponsorSegment: SponsorSegment?
+        get() {
+            val seconds = positionMs / 1000.0
+            return sponsorSegments.firstOrNull { seconds >= it.startSeconds && seconds < it.endSeconds }
+        }
+
     val canSearch: Boolean get() = sourcesEnabled && !searching
 }
 
@@ -59,6 +74,8 @@ class MusicViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val online: OnlineSourcesRepository,
     private val settings: SettingsRepository,
+    private val sponsorBlock: SponsorBlockClient,
+    private val dislikes: ReturnYouTubeDislikeClient,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MusicUiState())
@@ -174,9 +191,12 @@ class MusicViewModel @Inject constructor(
                 it.copy(
                     nowPlayingTitle = track.title,
                     nowPlayingArtist = track.artist,
+                    community = null,
+                    sponsorSegments = emptyList(),
                 )
             }
             startTicker(player)
+            loadCommunityData(track)
         }
     }
 
@@ -199,11 +219,39 @@ class MusicViewModel @Inject constructor(
         _state.update { it.copy(sleepTimerMinutes = minutes) }
     }
 
+    /** Layer (c): optional community data, never blocking playback. */
+    private fun loadCommunityData(track: MediaTrack) {
+        val videoId = YouTubeIds.videoIdOf(track.id) ?: return
+        viewModelScope.launch {
+            val votes = dislikes.votes(videoId)
+            _state.update { it.copy(community = votes) }
+        }
+        viewModelScope.launch {
+            val segments = sponsorBlock.segments(videoId)
+            _state.update { it.copy(sponsorSegments = segments) }
+        }
+    }
+
+    /** Jumps past the sponsor segment the playhead is inside. */
+    fun skipActiveSponsor() {
+        val segment = _state.value.activeSponsorSegment ?: return
+        val player = controller ?: return
+        player.seekTo((segment.endSeconds * 1000).toLong())
+        _state.update {
+            it.copy(
+                positionMs = (segment.endSeconds * 1000).toLong(),
+                sponsorsSkipped = it.sponsorsSkipped + 1,
+            )
+        }
+    }
+
     private fun startTicker(player: MediaController) {
         playbackTicker?.cancel()
         playbackTicker = viewModelScope.launch {
             while (isActive) {
-                _state.update { it.copy(isPlaying = player.isPlaying) }
+                _state.update {
+                    it.copy(isPlaying = player.isPlaying, positionMs = player.currentPosition)
+                }
                 if (player.playbackState == Player.STATE_ENDED) playNext()
                 delay(700)
             }
@@ -240,6 +288,19 @@ class MusicViewModel @Inject constructor(
         }.getOrNull()
         controller = connected
         return connected
+    }
+
+    private object YouTubeIds {
+        fun videoIdOf(url: String): String? {
+            val candidate = when {
+                url.contains("youtu.be/") -> url.substringAfter("youtu.be/").substringBefore('?')
+                url.contains("v=") -> url.substringAfter("v=").substringBefore('&')
+                url.contains("/shorts/") -> url.substringAfter("/shorts/").substringBefore('?')
+                url.contains("/embed/") -> url.substringAfter("/embed/").substringBefore('?')
+                else -> null
+            }
+            return candidate?.takeIf { it.length in 5..20 }
+        }
     }
 
     private fun Throwable.userText(): String = when (this) {
