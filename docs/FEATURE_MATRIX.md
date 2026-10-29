@@ -5,13 +5,13 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · ⛔ not built on purpose
 ## Downloads (phase 2–4)
 | Feature | Status |
 |---|---|
-| Segmented engine (1–32 parts, dynamic re-split) | ⏳ |
-| Pause/resume with ETag/Last-Modified validation | ⏳ |
-| Safe single-connection fallback without ranges | ⏳ |
-| Queue, retry policy, speed limiter, proxy/auth | ⏳ |
+| Segmented engine (1–32 parts, dynamic re-split) | ✅ engine, ⏳ wired to queue |
+| Resume validation rules (ETag/Last-Modified/size) | ✅ Rust + Kotlin tests, ⏳ per-part persistence |
+| Safe single-connection fallback without ranges | ✅ |
+| Retry with exponential backoff | ✅  ·  queue, speed limiter, proxy/auth ⏳ |
 | Foreground service, combined + per-item notifications | ⏳ |
 | Torrent (jlibtorrent), HLS/DASH, FFmpeg merge | ⏳ |
-| Categories, SD-card (SAF/MediaStore), checksums | ⏳ |
+| Checksums (SHA-256 / MD5 / SHA-1, streaming) | ✅  ·  categories, SD-card ⏳ |
 
 ## Browser (phase 5)
 | Feature | Status |

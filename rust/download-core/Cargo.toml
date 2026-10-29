@@ -1,0 +1,25 @@
+[package]
+name = "vortexa_download_core"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+description = "Segment planning, resume validation and checksums for Vortexa's download engine"
+
+[lib]
+name = "vortexa_download_core"
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+sha2 = "0.10"
+md-5 = "0.10"
+jni = { version = "0.21", optional = true }
+
+[features]
+default = []
+jni-bridge = ["jni"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = "symbols"

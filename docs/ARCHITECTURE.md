@@ -32,6 +32,24 @@ behind a repository interface so the ViewModel stays testable on the JVM.
 - Secrets (site logins, proxy credentials) will use the Android Keystore, never
   DataStore in plain text.
 
+## Download engine
+
+`feature/downloader/engine` is transport + disk only:
+
+- `DownloadEngine.probe()` issues `Range: bytes=0-0` to learn the length,
+  validators and whether ranges are honoured.
+- `DownloadEngine.download()` plans ranges, pre-allocates the target file and
+  writes each range at its absolute offset through a `FileChannel`. Ranges run
+  in parallel coroutines; progress is sampled every 200 ms and emitted as a
+  cold `Flow<DownloadEvent>`.
+- Failures leave the partial file in place (never truncate), so a later run can
+  resume. Retries use exponential backoff per range.
+- If the server ignores `Range`, the engine falls back to a single connection.
+
+Segment arithmetic and resume rules also exist in `rust/download-core`, tested
+with the same vectors. Transport stays in Kotlin so HTTP/2, proxies and TLS
+configuration are not re-implemented across a JNI boundary.
+
 ## Threading
 
 Repository work runs on injected dispatchers; ViewModels expose immutable state

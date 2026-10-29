@@ -21,9 +21,19 @@ clean-room from public feature descriptions.
 | Hilt dependency injection across all modules | ✅ |
 | English + Bangla strings | ✅ |
 | Unit tests (formatters, filename sanitizer, download status) | ✅ |
-| Download engine, browser, players | ⏳ phases 2–7 |
+| Rust download core: range planning, resume decisions, checksums | ✅ (21 cargo tests) |
+| Kotlin segmented download engine: ranges, retry, progress, checksum | ✅ (16 JVM tests) |
+| Queue/notification UI, browser, players | ⏳ phases 3–7 |
 
 Unimplemented screens show an explicit "Phase N" badge instead of a fake UI.
+
+Download engine tests run against a real local HTTP server (sockets, `Range`,
+`206 Partial Content`, ETag), not mocks:
+
+```bash
+./gradlew :feature:downloader:testDebugUnitTest
+cd rust/download-core && cargo test
+```
 
 See [docs/FEATURE_MATRIX.md](docs/FEATURE_MATRIX.md) for the full plan and
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for module boundaries.
