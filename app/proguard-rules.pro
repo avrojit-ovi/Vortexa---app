@@ -12,3 +12,9 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
+
+# Rhino ships inside NewPipeExtractor and reflects into java.beans for its JSON
+# converters. Android has no java.beans and those paths are never reached, so R8
+# only needs them silenced instead of failing the release build.
+-dontwarn java.beans.**
+-dontwarn javax.script.**

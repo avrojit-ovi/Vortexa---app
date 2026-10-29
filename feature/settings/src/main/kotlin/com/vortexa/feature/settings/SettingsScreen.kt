@@ -399,7 +399,7 @@ private fun ProxyDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.action_cancel))
+                Text(text = stringResource(R.string.settings_proxy_cancel))
             }
         },
     )

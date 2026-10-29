@@ -44,5 +44,5 @@
     <string name="settings_proxy_password_saved">A password is saved — leave blank to keep it</string>
     <string name="settings_proxy_invalid">Enter a host and a port from 1 to 65535.</string>
     <string name="settings_proxy_save">Save</string>
-    <string name="action_cancel">Cancel</string>
+    <string name="settings_proxy_cancel">Cancel</string>
 </resources>

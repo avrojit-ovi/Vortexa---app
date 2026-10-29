@@ -12,7 +12,7 @@ manager**, an **ad-blocking browser**, a **gesture-driven video player** and an
 together. Built from scratch in Kotlin and Jetpack Compose (Material 3), with a
 Rust core for the hot paths.
 
-> **Status: early build (v0.2.0).** The foundation, theme, settings and the
+> **Status: early build (v0.3.0).** The foundation, theme, settings and the
 > download engine are working and tested; the browser and both players are the
 > next phases. Screens that are not implemented say so — they never show a fake UI.
 
@@ -21,7 +21,7 @@ Rust core for the hot paths.
 Grab the signed APK from the [latest release](https://github.com/avrojit-ovi/Vortexa---app/releases/latest):
 
 ```bash
-adb install vortexa-0.2.0-release.apk
+adb install vortexa-0.3.0-release.apk
 ```
 
 `minSdk 26 (Android 8.0)` · `arm64-v8a`, `armeabi-v7a`, `x86_64` · no Play Services required.
@@ -36,7 +36,7 @@ adb install vortexa-0.2.0-release.apk
 | A music player with a serious EQ | Planned: graphic + parametric EQ via `AudioEffect`/`DynamicsProcessing`, later a native DSP (phase 7) |
 | One app instead of four | Shared library, unified search, global mini-player, private vault (phase 8) |
 
-## What works today (v0.2.0)
+## What works today (v0.3.0)
 
 - **Multi-module Kotlin/Compose app** — 10 Gradle modules, Hilt, Room, DataStore, type-safe version catalog.
 - **Material 3 theme** — light, dark, true-black **AMOLED**, and wallpaper colours (Material You).
