@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tab_downloads">ডাউনলোড</string>
+    <string name="tab_browser">ব্রাউজার</string>
+    <string name="tab_video">ভিডিও</string>
+    <string name="tab_music">মিউজিক</string>
+    <string name="tab_more">আরও</string>
+
+    <string name="destination_vault">প্রাইভেট ভল্ট</string>
+    <string name="destination_settings">সেটিংস</string>
+    <string name="more_vault_summary">লুকানো, PIN-লক করা ফাইল আর ফোল্ডার</string>
+    <string name="more_settings_summary">থিম, ভাষা, স্টোরেজ আর নেটওয়ার্ক</string>
+</resources>

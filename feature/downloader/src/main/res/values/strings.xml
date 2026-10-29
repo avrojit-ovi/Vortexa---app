@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_title">Downloads</string>
+    <string name="feature_description">Segmented, resumable downloads powered by a Rust core arrive in phase 2.</string>
+    <string name="feature_phase">Phase 2</string>
+    <string name="downloads_empty_title">No downloads yet</string>
+    <string name="downloads_empty_message">The segmented download engine lands in phase 2. Live progress, parts and speed will show up here.</string>
+</resources>

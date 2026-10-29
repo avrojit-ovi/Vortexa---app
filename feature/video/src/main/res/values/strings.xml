@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_title">Video</string>
+    <string name="feature_description">MX-style player with gestures, decoder switching and subtitles arrives in phase 6.</string>
+    <string name="feature_phase">Phase 6</string>
+</resources>

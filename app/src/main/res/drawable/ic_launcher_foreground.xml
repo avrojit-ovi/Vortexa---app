@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Stylised V -->
+    <path
+        android:fillColor="#7C5CFF"
+        android:pathData="M31,31h11l12,26l12,-26h11L57,78h-2z" />
+    <!-- Download chevron inside the V -->
+    <path
+        android:fillColor="#22D3EE"
+        android:pathData="M50,55h8v13l6,-6v9l-10,10l-10,-10v-9l6,6z" />
+</vector>

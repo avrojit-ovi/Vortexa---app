@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_title">ডাউনলোড</string>
+    <string name="feature_description">Rust কোর আর segmented, রিজিউমেবল ডাউনলোড Phase 2-এ আসবে।</string>
+    <string name="feature_phase">Phase 2</string>
+    <string name="downloads_empty_title">এখনো কোনো ডাউনলোড নেই</string>
+    <string name="downloads_empty_message">segmented ডাউনলোড ইঞ্জিন Phase 2-এ যোগ হবে। তখন এখানে লাইভ প্রগ্রেস, পার্ট আর স্পিড দেখতে পাবেন।</string>
+</resources>

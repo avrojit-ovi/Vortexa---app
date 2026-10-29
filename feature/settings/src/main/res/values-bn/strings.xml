@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_title">সেটিংস</string>
+    <string name="feature_description">থিম, ভাষা, স্টোরেজ আর নেটওয়ার্ক সেটিংস।</string>
+    <string name="feature_phase">Phase 1</string>
+
+    <string name="settings_appearance">অ্যাপিয়ারেন্স</string>
+    <string name="settings_theme_system">সিস্টেম অনুযায়ী</string>
+    <string name="settings_theme_light">লাইট</string>
+    <string name="settings_theme_dark">ডার্ক</string>
+    <string name="settings_theme_amoled">AMOLED কালো</string>
+    <string name="settings_dynamic_color">Material You রঙ</string>
+    <string name="settings_dynamic_color_summary">ওয়ালপেপারের রঙ ব্যবহার করুন (Android 12+)</string>
+    <string name="settings_about">সম্পর্কে</string>
+    <string name="settings_version">ভার্সন %1$s</string>
+    <string name="settings_license">প্রোপ্রাইটারি বিল্ড। সর্বস্বত্ব সংরক্ষিত।</string>
+</resources>

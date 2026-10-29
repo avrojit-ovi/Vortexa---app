@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_title">ভল্ট</string>
+    <string name="feature_description">PIN/বায়োমেট্রিক এনক্রিপ্টেড প্রাইভেট ভল্ট Phase 8-এ আসবে।</string>
+    <string name="feature_phase">Phase 8</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_title">Vault</string>
+    <string name="feature_description">PIN/biometric encrypted private vault arrives in phase 8.</string>
+    <string name="feature_phase">Phase 8</string>
+</resources>

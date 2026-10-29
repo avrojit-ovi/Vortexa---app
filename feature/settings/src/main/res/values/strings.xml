@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_title">Settings</string>
+    <string name="feature_description">Theme, language, storage and network settings.</string>
+    <string name="feature_phase">Phase 1</string>
+
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme_system">Follow system</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_amoled">AMOLED black</string>
+    <string name="settings_dynamic_color">Material You colours</string>
+    <string name="settings_dynamic_color_summary">Use wallpaper colours (Android 12+)</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_license">Proprietary build. All rights reserved.</string>
+</resources>

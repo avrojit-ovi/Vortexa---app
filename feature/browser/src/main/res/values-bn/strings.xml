@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_title">ব্রাউজার</string>
+    <string name="feature_description">বিজ্ঞাপন-মুক্ত WebView ব্রাউজার আর মিডিয়া স্নিফার Phase 5-এ আসবে।</string>
+    <string name="feature_phase">Phase 5</string>
+</resources>

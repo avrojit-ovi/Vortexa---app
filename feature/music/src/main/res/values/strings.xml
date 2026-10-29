@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_title">Music</string>
+    <string name="feature_description">Poweramp-style player with a graphic/parametric EQ and DSP arrives in phase 7.</string>
+    <string name="feature_phase">Phase 7</string>
+</resources>
