@@ -1,8 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="feature_title">ডাউনলোড</string>
-    <string name="feature_description">Rust কোর আর segmented, রিজিউমেবল ডাউনলোড Phase 2-এ আসবে।</string>
-    <string name="feature_phase">Phase 2</string>
+    <string name="feature_description">Rust কোর আর segmented, রিজিউমেবল ডাউনলোড।</string>
+    <string name="feature_phase">Phase 3</string>
+
     <string name="downloads_empty_title">এখনো কোনো ডাউনলোড নেই</string>
-    <string name="downloads_empty_message">segmented ডাউনলোড ইঞ্জিন Phase 2-এ যোগ হবে। তখন এখানে লাইভ প্রগ্রেস, পার্ট আর স্পিড দেখতে পাবেন।</string>
+    <string name="downloads_empty_message">+ বোতাম দিয়ে সরাসরি লিংক পেস্ট করুন। ফাইল সমান্তরাল ভাগে নামবে, ব্যর্থ হলে নিরাপদে রিজিউম হবে, আর অ্যাপের Downloads ফোল্ডারে সেভ থাকবে।</string>
+
+    <string name="downloads_add">ডাউনলোড যোগ করুন</string>
+    <string name="downloads_add_title">নতুন ডাউনলোড</string>
+    <string name="downloads_add_hint">https://example.com/file.zip</string>
+    <string name="downloads_add_confirm">ডাউনলোড</string>
+    <string name="downloads_add_invalid">এটা http(s) লিংক মনে হচ্ছে না।</string>
+
+    <string name="action_pause">বিরতি</string>
+    <string name="action_resume">চালু করুন</string>
+    <string name="action_cancel">সরান</string>
+
+    <string name="status_queued">সারিতে আছে</string>
+    <string name="status_running">শুরু হচ্ছে…</string>
+    <string name="status_paused">বিরতিতে</string>
+    <string name="status_completed">সম্পন্ন</string>
+    <string name="status_failed">ব্যর্থ — চালু করতে প্লে চাপুন</string>
+    <string name="status_canceled">বাতিল</string>
 </resources>

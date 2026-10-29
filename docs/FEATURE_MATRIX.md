@@ -5,11 +5,11 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · ⛔ not built on purpose
 ## Downloads (phase 2–4)
 | Feature | Status |
 |---|---|
-| Segmented engine (1–32 parts, dynamic re-split) | ✅ engine, ⏳ wired to queue |
-| Resume validation rules (ETag/Last-Modified/size) | ✅ Rust + Kotlin tests, ⏳ per-part persistence |
+| Segmented engine (1–32 parts) + queue + pause/resume UI | ✅ |
+| Resume: ETag/Last-Modified/size validation + per-part offsets in Room | ✅ |
 | Safe single-connection fallback without ranges | ✅ |
 | Retry with exponential backoff | ✅  ·  queue, speed limiter, proxy/auth ⏳ |
-| Foreground service, combined + per-item notifications | ⏳ |
+| Foreground service + notifications | ⏳ (downloads currently stop with the app process) |
 | Torrent (jlibtorrent), HLS/DASH, FFmpeg merge | ⏳ |
 | Checksums (SHA-256 / MD5 / SHA-1, streaming) | ✅  ·  categories, SD-card ⏳ |
 

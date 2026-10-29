@@ -8,6 +8,8 @@ sealed interface DownloadEvent {
         val totalBytes: Long,
         val bytesPerSecond: Long,
         val activeParts: Int,
+        /** Snapshot of every range, used to persist crash-safe resume state. */
+        val parts: List<SegmentState> = emptyList(),
     ) : DownloadEvent {
         val fraction: Float
             get() = if (totalBytes <= 0L) 0f

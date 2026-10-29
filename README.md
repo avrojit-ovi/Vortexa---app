@@ -42,7 +42,9 @@ adb install vortexa-0.2.0-release.apk
 - **Material 3 theme** — light, dark, true-black **AMOLED**, and wallpaper colours (Material You).
 - **Five-tab shell** — Downloads · Browser · Video · Music · More, with SlidingContent transitions.
 - **Settings that actually work** — theme mode and dynamic colour persist in DataStore and repaint the app instantly.
+- **Working download screen** — add a link, watch live progress and speed, pause/resume/remove. The queue lives in an application-scoped coroutine owner, so changing screens never cancels a transfer.
 - **Segmented download engine** — range probing, parallel ranged download, progress flow with live speed, retry, checksum (SHA-256/MD5/SHA-1).
+- **Crash-safe resume** — per-range offsets (`start-end:downloaded;…`) are persisted in Room every second, and a migration carries v1 databases forward.
 - **Rust core** — range planning, resume decisions and streaming hashes, 21 unit tests, same test vectors as the Kotlin planner.
 - **English + বাংলা** localisation, edge-to-edge, adaptive icon, RTL-ready.
 - **29 JVM tests + 21 Rust tests**, Android Lint clean (0 errors).

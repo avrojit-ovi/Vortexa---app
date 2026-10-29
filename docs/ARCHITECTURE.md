@@ -50,6 +50,24 @@ Segment arithmetic and resume rules also exist in `rust/download-core`, tested
 with the same vectors. Transport stays in Kotlin so HTTP/2, proxies and TLS
 configuration are not re-implemented across a JNI boundary.
 
+## Queue and persistence
+
+`DownloadManager` (singleton, `:feature:downloader`) owns an application-scoped
+`CoroutineScope` and one `Job` per download, so navigation never cancels a
+transfer. Room is the single source of truth: the UI only renders what the DAO
+emits. Progress is written at most once per second — frequent enough for a
+crash to lose at most a second of work, rare enough not to hammer SQLite.
+
+Resume state is a compact string per download:
+
+```
+0-524287:524288;524288-1048575:0;...
+```
+
+`SegmentCodec` encodes and decodes it without third-party JSON, drops corrupt
+entries instead of throwing, and `MIGRATION_1_2` adds the column for databases
+created by v0.2.0.
+
 ## Threading
 
 Repository work runs on injected dispatchers; ViewModels expose immutable state

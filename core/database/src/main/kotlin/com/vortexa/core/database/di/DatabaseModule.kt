@@ -19,9 +19,9 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): VortexaDatabase =
         Room.databaseBuilder(context, VortexaDatabase::class.java, VortexaDatabase.NAME)
-            // Version 1 has no released users yet; once a build ships this must be
-            // replaced by real migrations.
-            .fallbackToDestructiveMigration(dropAllTables = true)
+            .addMigrations(VortexaDatabase.MIGRATION_1_2)
+            // Only a downgrade may wipe data; an upgrade never does.
+            .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
             .build()
 
     @Provides

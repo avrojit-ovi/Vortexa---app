@@ -2,7 +2,25 @@
 <resources>
     <string name="feature_title">Downloads</string>
     <string name="feature_description">Segmented, resumable downloads powered by a Rust core arrive in phase 2.</string>
-    <string name="feature_phase">Phase 2</string>
+    <string name="feature_phase">Phase 3</string>
+
     <string name="downloads_empty_title">No downloads yet</string>
-    <string name="downloads_empty_message">The segmented download engine lands in phase 2. Live progress, parts and speed will show up here.</string>
+    <string name="downloads_empty_message">Paste a direct link with the + button. Files are split into parallel ranges, resumed safely after a failure, and saved in the app\'s Downloads folder.</string>
+
+    <string name="downloads_add">Add download</string>
+    <string name="downloads_add_title">New download</string>
+    <string name="downloads_add_hint">https://example.com/file.zip</string>
+    <string name="downloads_add_confirm">Download</string>
+    <string name="downloads_add_invalid">That does not look like an http(s) link.</string>
+
+    <string name="action_pause">Pause</string>
+    <string name="action_resume">Resume</string>
+    <string name="action_cancel">Remove</string>
+
+    <string name="status_queued">Queued</string>
+    <string name="status_running">Starting…</string>
+    <string name="status_paused">Paused</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_failed">Failed — tap play to resume</string>
+    <string name="status_canceled">Canceled</string>
 </resources>

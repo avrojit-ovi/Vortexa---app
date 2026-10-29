@@ -59,6 +59,10 @@ data class DownloadEntity(
     @ColumnInfo(name = "retry_count")
     val retryCount: Int = 0,
 
+    /** Per-range progress (`start-end:downloaded;...`) for crash-safe resume. */
+    @ColumnInfo(name = "segments")
+    val segments: String? = null,
+
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),
 

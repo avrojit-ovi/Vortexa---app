@@ -18,12 +18,16 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 
-/** A range that still has to be fetched, plus how much of it is already on disk. */
+/** A byte range of the remote file plus how much of it is already on disk. */
 data class SegmentState(
     val start: Long,
     val end: Long,
     val downloaded: Long = 0L,
-)
+) {
+    val length: Long get() = end - start + 1
+
+    fun isComplete(): Boolean = downloaded >= length
+}
 
 data class DownloadSpec(
     val url: HttpUrl,
@@ -45,8 +49,9 @@ data class DownloadSpec(
  * and checksums are pure functions covered by their own tests and mirrored in
  * the Rust core.
  *
- * Cancelling the flow leaves the partial file on disk — that is what makes a
- * later resume possible. It never truncates on failure.
+ * Every progress event carries a snapshot of all ranges, so the caller can
+ * persist per-part offsets and resume exactly where each range stopped after a
+ * crash or a force stop. Cancelling the flow leaves the partial file on disk.
  */
 class DownloadEngine(
     private val client: OkHttpClient = OkHttpClient(),
@@ -135,8 +140,10 @@ class DownloadEngine(
         alreadyOnDisk: Long,
         emit: suspend (DownloadEvent) -> Unit,
     ) = coroutineScope {
+        val lock = Any()
+        val live = states.toMutableList()
         val downloaded = AtomicLong(alreadyOnDisk)
-        val activeParts = AtomicLong(states.count { it.downloaded < it.end - it.start + 1 }.toLong())
+        val activeParts = AtomicLong(states.count { !it.isComplete() }.toLong())
 
         val ticker = launch(Dispatchers.IO) {
             var previousBytes = downloaded.get()
@@ -149,33 +156,50 @@ class DownloadEngine(
                 val speed = ((current - previousBytes) * 1000L) / elapsed
                 previousBytes = current
                 previousAt = now
+                val snapshot = synchronized(lock) { live.toList() }
                 emit(
                     DownloadEvent.Progress(
                         downloadedBytes = current,
                         totalBytes = metadata.totalBytes,
                         bytesPerSecond = speed.coerceAtLeast(0L),
                         activeParts = activeParts.get().toInt(),
+                        parts = snapshot,
                     ),
                 )
             }
         }
 
         try {
-            states.forEach { state ->
-                val remaining = RangeSegment(0, state.start, state.end).remaining(state.downloaded)
-                    ?: return@forEach
+            live.forEachIndexed { index, state ->
+                if (state.isComplete()) return@forEachIndexed
                 launch(Dispatchers.IO) {
-                    fetchRange(spec, remaining, channel, downloaded, spec.maxRetries)
+                    fetchRange(
+                        spec = spec,
+                        start = state.start + state.downloaded,
+                        end = state.end,
+                        channel = channel,
+                        onBytes = { writtenInRange ->
+                            val updated = state.downloaded + writtenInRange
+                            synchronized(lock) {
+                                val delta = (updated - live[index].downloaded).coerceAtLeast(0L)
+                                live[index] = state.copy(downloaded = updated)
+                                downloaded.addAndGet(delta)
+                            }
+                        },
+                        retriesLeft = spec.maxRetries,
+                    )
                     activeParts.decrementAndGet()
                 }
             }
-            // Emit a final progress sample so listeners see 100%.
+
+            val snapshot = synchronized(lock) { live.toList() }
             emit(
                 DownloadEvent.Progress(
                     downloadedBytes = downloaded.get(),
                     totalBytes = metadata.totalBytes,
                     bytesPerSecond = 0L,
                     activeParts = 0,
+                    parts = snapshot,
                 ),
             )
         } finally {
@@ -185,16 +209,17 @@ class DownloadEngine(
 
     private suspend fun fetchRange(
         spec: DownloadSpec,
-        range: RangeSegment,
+        start: Long,
+        end: Long,
         channel: FileChannel,
-        downloaded: AtomicLong,
+        onBytes: (Long) -> Unit,
         retriesLeft: Int,
     ) {
         var attempt = 0
         while (true) {
             try {
                 val request = requestBuilder(spec.url, spec.headers)
-                    .header("Range", range.rangeHeader())
+                    .header("Range", "bytes=$start-$end")
                     .get()
                     .build()
 
@@ -202,7 +227,7 @@ class DownloadEngine(
                     if (response.code != 206 && response.code != 200) {
                         throw DownloadHttpException(response.code, response.message)
                     }
-                    copyBody(response, channel, range, downloaded)
+                    copyBody(response, channel, start, onBytes)
                 }
                 return
             } catch (io: java.io.IOException) {
@@ -216,11 +241,12 @@ class DownloadEngine(
     private fun copyBody(
         response: Response,
         channel: FileChannel,
-        range: RangeSegment,
-        downloaded: AtomicLong,
+        startPosition: Long,
+        onBytes: (Long) -> Unit,
     ) {
         val source = response.body.source()
-        var position = range.start
+        var position = startPosition
+        var writtenInRange = 0L
         val buffer = ByteArray(COPY_BUFFER_BYTES)
         while (true) {
             val read = source.read(buffer)
@@ -234,7 +260,8 @@ class DownloadEngine(
                 offset += written
             }
             position += read
-            downloaded.addAndGet(read.toLong())
+            writtenInRange += read
+            onBytes(writtenInRange)
         }
     }
 

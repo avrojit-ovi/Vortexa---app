@@ -31,6 +31,31 @@ interface DownloadDao {
     @Query("UPDATE downloads SET downloaded_bytes = :bytes, updated_at = :timestamp WHERE id = :id")
     suspend fun updateProgress(id: Long, bytes: Long, timestamp: Long = System.currentTimeMillis())
 
+    @Query(
+        "UPDATE downloads SET downloaded_bytes = :bytes, total_bytes = :total, segments = :segments, " +
+            "updated_at = :timestamp WHERE id = :id",
+    )
+    suspend fun updateProgressDetail(
+        id: Long,
+        bytes: Long,
+        total: Long,
+        segments: String?,
+        timestamp: Long = System.currentTimeMillis(),
+    )
+
+    @Query(
+        "UPDATE downloads SET file_name = :fileName, total_bytes = :total, etag = :etag, " +
+            "last_modified = :lastModified, updated_at = :timestamp WHERE id = :id",
+    )
+    suspend fun updateMetadata(
+        id: Long,
+        fileName: String,
+        total: Long,
+        etag: String?,
+        lastModified: String?,
+        timestamp: Long = System.currentTimeMillis(),
+    )
+
     @Query("DELETE FROM downloads WHERE id = :id")
     suspend fun deleteById(id: Long)
 
