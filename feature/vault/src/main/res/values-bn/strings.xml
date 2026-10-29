@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_title">ভল্ট</string>
-    <string name="feature_description">PIN/বায়োমেট্রিক এনক্রিপ্টেড প্রাইভেট ভল্ট Phase 8-এ আসবে।</string>
-    <string name="feature_phase">Phase 8</string>
+    <string name="vault_locked_title">ভল্ট লক করা আছে</string>
+    <string name="vault_locked_body">ভেতরের ফাইল দেখতে PIN দিন।</string>
+    <string name="vault_set_pin_title">ভল্ট তৈরি করুন</string>
+    <string name="vault_set_pin_body">৪–১২ সংখ্যার একটা PIN বেছে নিন। এখানে রাখা সব কিছু এমন চাবি দিয়ে এনক্রিপ্ট হয় যা এই ডিভাইস ছেড়ে যায় না।</string>
+    <string name="vault_pin">PIN</string>
+    <string name="vault_confirm_pin">PIN আবার দিন</string>
+    <string name="vault_unlock">খুলুন</string>
+    <string name="vault_set_pin_action">ভল্ট তৈরি করুন</string>
+    <string name="vault_use_biometric">ফিঙ্গারপ্রিন্ট বা ফেস ব্যবহার করুন</string>
+    <string name="vault_encrypted_note">ফাইলগুলো অ্যাপের প্রাইভেট স্টোরেজে এনক্রিপ্টেড (AES-256-GCM) থাকে। চাবি এই ডিভাইসের Keystore-এ থাকে, তাই ফাইল কপি করেও অন্য কোথাও খোলা যাবে না।</string>
+    <string name="vault_recovery_note">রিকভারি নেই: PIN ভুলে গেলে ফাইল না হারিয়ে রিসেট করার উপায় নেই</string>
+
+    <string name="vault_import">ইমপোর্ট</string>
+    <string name="vault_lock">লক</string>
+    <string name="vault_delete">মুছুন</string>
+    <string name="vault_files">%1$dটি ফাইল</string>
+    <string name="vault_size">%1$s এনক্রিপ্টেড</string>
+
+    <string name="vault_empty_title">ভল্ট খালি</string>
+    <string name="vault_empty_body">ছবি, ভিডিও বা ডকুমেন্ট ইমপোর্ট করুন — ফোনের বাকি জায়গা থেকে সেগুলো সরে যাবে।</string>
+
+    <string name="vault_imported">এনক্রিপ্ট করে ভল্টে যোগ করা হয়েছে</string>
+    <string name="vault_import_failed">ফাইলটা ইমপোর্ট করা গেল না</string>
+    <string name="vault_deleted">মুছে ফেলা হয়েছে</string>
+    <string name="vault_wrong_pin">PIN-টা ঠিক নেই</string>
+    <string name="vault_pin_mismatch">দুইবার দেওয়া PIN মিলছে না</string>
+    <string name="vault_pin_invalid">৪ থেকে ১২ সংখ্যা দিন</string>
+    <string name="vault_open_failed">ফাইলটা খোলা গেল না</string>
 </resources>

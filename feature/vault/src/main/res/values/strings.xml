@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_title">Vault</string>
-    <string name="feature_description">PIN/biometric encrypted private vault arrives in phase 8.</string>
-    <string name="feature_phase">Phase 8</string>
+    <string name="vault_locked_title">Vault is locked</string>
+    <string name="vault_locked_body">Enter your PIN to see the files inside.</string>
+    <string name="vault_set_pin_title">Set up the vault</string>
+    <string name="vault_set_pin_body">Choose a 4–12 digit PIN. Everything you add is encrypted with a key that never leaves this device.</string>
+    <string name="vault_pin">PIN</string>
+    <string name="vault_confirm_pin">Confirm PIN</string>
+    <string name="vault_unlock">Unlock</string>
+    <string name="vault_set_pin_action">Create vault</string>
+    <string name="vault_use_biometric">Use fingerprint or face</string>
+    <string name="vault_encrypted_note">Files are stored encrypted (AES-256-GCM) in the app\'s private storage. The key lives in this device\'s Keystore, so a copied file cannot be opened elsewhere.</string>
+    <string name="vault_recovery_note">No recovery: a forgotten PIN cannot be reset without losing the files</string>
+
+    <string name="vault_import">Import</string>
+    <string name="vault_lock">Lock</string>
+    <string name="vault_delete">Delete</string>
+    <string name="vault_files">%1$d files</string>
+    <string name="vault_size">%1$s encrypted</string>
+
+    <string name="vault_empty_title">The vault is empty</string>
+    <string name="vault_empty_body">Import photos, videos or documents and they disappear from the rest of the phone.</string>
+
+    <string name="vault_imported">Encrypted and added to the vault</string>
+    <string name="vault_import_failed">That file could not be imported</string>
+    <string name="vault_deleted">Deleted</string>
+    <string name="vault_wrong_pin">That PIN is not right</string>
+    <string name="vault_pin_mismatch">The two PINs do not match</string>
+    <string name="vault_pin_invalid">Use 4 to 12 digits</string>
+    <string name="vault_open_failed">This file could not be opened</string>
 </resources>

@@ -33,6 +33,8 @@ data class UserPreferences(
     val decoderMode: DecoderMode = DecoderMode.AUTO,
     /** Four digits that unlock a player the user locked for a child. Not a secret store. */
     val kidsLockPin: String = "",
+    /** Salted PBKDF2 hash of the vault PIN; empty until the vault is set up. */
+    val vaultPinHash: String = "",
 )
 
 interface SettingsRepository {
@@ -45,6 +47,7 @@ interface SettingsRepository {
     suspend fun setBlockAds(enabled: Boolean)
     suspend fun setDecoderMode(mode: DecoderMode)
     suspend fun setKidsLockPin(pin: String)
+    suspend fun setVaultPinHash(hash: String)
 }
 
 // A single DataStore instance per process; the delegate enforces that.
@@ -64,6 +67,7 @@ class DataStoreSettingsRepository(
         val BLOCK_ADS = booleanPreferencesKey("block_ads")
         val DECODER_MODE = stringPreferencesKey("decoder_mode")
         val KIDS_LOCK_PIN = stringPreferencesKey("kids_lock_pin")
+        val VAULT_PIN_HASH = stringPreferencesKey("vault_pin_hash")
     }
 
     override val preferences: Flow<UserPreferences> = dataStore.data
@@ -79,6 +83,7 @@ class DataStoreSettingsRepository(
                 blockAds = prefs[Keys.BLOCK_ADS] ?: true,
                 decoderMode = DecoderMode.fromStorage(prefs[Keys.DECODER_MODE]),
                 kidsLockPin = prefs[Keys.KIDS_LOCK_PIN] ?: "",
+                vaultPinHash = prefs[Keys.VAULT_PIN_HASH] ?: "",
             )
         }
 
@@ -115,6 +120,10 @@ class DataStoreSettingsRepository(
 
     override suspend fun setKidsLockPin(pin: String) {
         dataStore.edit { it[Keys.KIDS_LOCK_PIN] = pin }
+    }
+
+    override suspend fun setVaultPinHash(hash: String) {
+        dataStore.edit { it[Keys.VAULT_PIN_HASH] = hash }
     }
 }
 

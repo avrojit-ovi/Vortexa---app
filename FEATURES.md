@@ -97,10 +97,15 @@ verified on the `debugRuntimeClasspath`. What is still unverified is end-to-end
 resolution on a real device/network; if a video yields no URL the embed fallback
 opens instead of failing.
 
-## 9. Vault · planned
+## 9. Vault · active
 | Feature | Status | Risk |
 |---|---|---|
-| PIN + biometric lock, file encryption (AES-GCM, keys in Keystore) | planned | LOW |
+| Vault files encrypted with AES-256-GCM, key in the Android Keystore, streamed in 64 KB chunks | implemented + 9 unit tests | LOW |
+| Container: magic, encrypted name block, separate IV for the body — the list reads names without decrypting whole files, and a flipped byte is rejected | implemented | LOW |
+| PIN gate: PBKDF2-HMAC-SHA256 (120k iterations, per-setup salt), never stored in clear | implemented + 6 unit tests | LOW |
+| Fingerprint/face shortcut through the platform prompt (API 28+), PIN stays as the fallback | implemented, not device-verified | MED |
+| Import from SAF, list, delete, open into the cache for the player | implemented | LOW |
+| Unified search across downloads, vault and local music | planned | LOW |
 | Unified search across downloads/video/music, mini-player | mini-player implemented | LOW |
 
 ## 10. Polish & release · planned

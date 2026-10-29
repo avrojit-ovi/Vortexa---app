@@ -1,2 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- The platform BiometricPrompt, used as a shortcut on top of the PIN. -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+</manifest>

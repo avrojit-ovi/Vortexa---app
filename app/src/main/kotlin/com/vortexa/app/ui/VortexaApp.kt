@@ -123,7 +123,13 @@ fun VortexaApp(modifier: Modifier = Modifier) {
                     onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                 )
             }
-            composable(Routes.VAULT) { VaultScreen() }
+            composable(Routes.VAULT) {
+                VaultScreen(
+                    onOpenMedia = { path, title ->
+                        navController.navigate(Routes.player(path, title))
+                    },
+                )
+            }
             composable(Routes.SETTINGS) { SettingsScreen() }
             composable(
                 route = Routes.EMBED,
