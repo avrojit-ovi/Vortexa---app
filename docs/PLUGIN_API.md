@@ -58,29 +58,27 @@ class Entry : PluginEntry {
 * Importing an APK executes that code with the app's permissions. That is why
   the feature is opt-in, per-plugin visible in settings, and removable.
 
-## Licensing — where GPL can and cannot reach
+## Licensing
 
-`LICENSE` in this repository is proprietary ("all rights reserved").
+`LICENSE` in this repository is **GPL-3.0-or-later**.
 
-**Bangla:** GPL-3.0 কোড (যেমন NewPipeExtractor) যদি অ্যাপের ভেতরে সরাসরি
-link করা হয়, তাহলে GPL বলে পুরো combined কাজটাই GPL-3.0 হয়ে যাবে — তখন
-আপনার প্রোপ্রাইটারি লাইসেন্স আর টিকবে না, পুরো সোর্স GPL-এ ছাড়তে হবে।
+**বাংলা:** অ্যাপ এখন GPL-3.0-or-later, তাই GPL-লাইসেন্সি কোড (যেমন
+NewPipeExtractor) সরাসরি link করলেও লাইসেন্সের দ্বন্দ্ব নেই — শর্ত একটাই:
+সোর্স কোড ও পরিবর্তনগুলোও GPL-3.0-এ প্রকাশ্যে রাখতে হবে।
 
-**English:** Linking GPL-3.0 code into the app makes the combined work GPL-3.0,
-which contradicts this repository's proprietary `LICENSE`. Two clean options:
+**English:** the app is GPL-3.0-or-later, so linking another GPL-3.0 library no
+longer creates a licence conflict; publishing the combined source satisfies it.
+The separate-plugin design is still kept for two other reasons:
 
-1. **Separate plugin APK (recommended, what this code supports).** The GPL code
-   lives only in the plugin. You keep the core proprietary, you distribute the
-   plugin yourself (or not at all), and the plugin's source stays GPL as that
-   licence requires. This is the classic "program + separate plugin" boundary;
-   it is the reason the plugin is loaded from an APK you install rather than
-   being a Gradle dependency.
-2. **Switch the whole app to GPL-3.0** and publish the source. Simple and
-   unambiguous, but then the app can never be closed-source.
+1. **Build hygiene** — the core stays service-agnostic, so a plugin can be
+   dropped, updated or removed without touching the app, and a plugin failure is
+   contained to one source.
+2. **Store separation** — a store build can ship without any plugin while the
+   APK you install yourself still adds one.
 
-Note that no licence arrangement changes a service's terms of use: a plugin
-that scrapes a service can still break that service's terms, and that is the
-user's call, which is why the toggle ships off with a warning.
+No licence arrangement changes a service's terms of use: a plugin that scrapes
+a service can still break that service's terms, which is why the toggle ships
+off with a warning and the choice stays with the person installing it.
 
 ## What the core does on its own
 

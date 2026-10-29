@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -22,11 +23,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -35,6 +42,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.vortexa.core.playback.EqualizerProfile
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vortexa.core.common.format.Formatters
@@ -53,6 +61,7 @@ fun MusicScreen(
     viewModel: MusicViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var showEqualizer by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize()) {
         if (!state.sourcesEnabled) {
@@ -99,7 +108,7 @@ fun MusicScreen(
                 contentPadding = PaddingValues(bottom = 12.dp),
             ) {
                 items(state.results, key = { "${it.extractorId}:${it.id}" }) { track ->
-                    TrackRow(track = track, onPlay = { viewModel.play(track) })
+                    TrackRow(track = track, onPlay = { viewModel.play(track, state.results) })
                     HorizontalDivider(
                         modifier = Modifier.padding(start = 64.dp),
                         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -112,8 +121,86 @@ fun MusicScreen(
             state = state,
             onTogglePlay = viewModel::pauseOrResume,
             onSleepTimer = viewModel::setSleepTimer,
+            onOpenEqualizer = { showEqualizer = true },
         )
     }
+
+    if (showEqualizer) {
+        EqualizerDialog(
+            enabled = state.equalizerEnabled,
+            bands = state.equalizerBands,
+            onChange = viewModel::setEqualizer,
+            onDismiss = { showEqualizer = false },
+        )
+    }
+}
+
+@Composable
+private fun EqualizerDialog(
+    enabled: Boolean,
+    bands: List<Int>,
+    onChange: (Boolean, List<Int>) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val values = remember(bands) { mutableStateListOf(*bands.toTypedArray()) }
+    val labels = listOf("60 Hz", "230 Hz", "910 Hz", "3.6 kHz", "14 kHz")
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.music_equalizer)) },
+        text = {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.music_and_audio),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Switch(
+                        checked = enabled,
+                        onCheckedChange = { onChange(it, values.toList()) },
+                    )
+                }
+                if (!enabled) {
+                    Text(
+                        text = stringResource(R.string.music_equalizer_off_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                values.forEachIndexed { index, gain ->
+                    Text(
+                        text = "${labels[index]}   ${gain / 100f} dB",
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                    Slider(
+                        value = gain.toFloat(),
+                        onValueChange = { values[index] = it.toInt() },
+                        onValueChangeFinished = { onChange(enabled, values.toList()) },
+                        valueRange = EqualizerProfile.MIN_LEVEL_MB.toFloat()..EqualizerProfile.MAX_LEVEL_MB.toFloat(),
+                        steps = 29,
+                        enabled = enabled,
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    EqualizerProfile.presets.forEach { preset ->
+                        AssistChip(
+                            onClick = {
+                                values.clear()
+                                values.addAll(preset.gains)
+                                onChange(enabled, preset.gains)
+                            },
+                            label = { Text(text = preset.name) },
+                            enabled = enabled,
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.music_close)) }
+        },
+    )
 }
 
 @Composable
@@ -191,6 +278,7 @@ private fun NowPlayingBar(
     state: MusicUiState,
     onTogglePlay: () -> Unit,
     onSleepTimer: (Int?) -> Unit,
+    onOpenEqualizer: () -> Unit,
 ) {
     val title = state.nowPlayingTitle ?: return
     Surface(tonalElevation = 3.dp) {
@@ -239,6 +327,9 @@ private fun NowPlayingBar(
                 }
                 TextButton(onClick = { onSleepTimer(null) }) {
                     Text(text = stringResource(R.string.music_sleep_off))
+                }
+                TextButton(onClick = onOpenEqualizer) {
+                    Text(text = stringResource(R.string.music_equalizer))
                 }
             }
         }

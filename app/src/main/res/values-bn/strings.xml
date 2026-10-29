@@ -10,4 +10,6 @@
     <string name="destination_settings">সেটিংস</string>
     <string name="more_vault_summary">লুকানো, PIN-লক করা ফাইল আর ফোল্ডার</string>
     <string name="more_settings_summary">থিম, ভাষা, স্টোরেজ আর নেটওয়ার্ক</string>
+    <string name="mini_player_play">চালান</string>
+    <string name="mini_player_pause">থামান</string>
 </resources>

@@ -93,6 +93,8 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:ui"))
     implementation(project(":core:database"))
+    implementation(project(":core:playback"))
+    implementation(project(":core:online"))
 
     implementation(project(":feature:downloader"))
     implementation(project(":feature:browser"))
@@ -106,6 +108,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.media3.session)
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)

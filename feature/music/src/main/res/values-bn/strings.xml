@@ -9,4 +9,8 @@
     <string name="music_sources_off_title">অনলাইন সোর্স বন্ধ আছে</string>
     <string name="music_sources_off_body">আপনি চালু না করলে কোনো থার্ড-পার্টি কিছুই চলে না। Settings → Online sources থেকে বিল্ট-ইন ডিরেক্ট-লিংক সোর্স চালু করতে পারেন, আর নিজে ইনস্টল করা এক্সট্রাক্টর প্লাগিন যোগ করতে পারেন।</string>
     <string name="music_open_settings">সেটিংস খুলুন</string>
+    <string name="music_equalizer">ইকুয়ালাইজার</string>
+    <string name="music_and_audio">অডিও ইফেক্ট</string>
+    <string name="music_equalizer_off_hint">চালু করলে প্রতিটা স্ট্রিম আর লোকাল ফাইলের শব্দ এই ব্যান্ড দিয়ে বদলানো যাবে।</string>
+    <string name="music_close">বন্ধ করুন</string>
 </resources>

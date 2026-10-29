@@ -63,7 +63,10 @@ fun VortexaApp(modifier: Modifier = Modifier) {
         },
         bottomBar = {
             if (!immersive) {
-                VortexaBottomBar(navController = navController, currentRoute = currentRoute)
+                androidx.compose.foundation.layout.Column {
+                    MiniPlayer()
+                    VortexaBottomBar(navController = navController, currentRoute = currentRoute)
+                }
             }
         },
         contentWindowInsets = if (immersive) {

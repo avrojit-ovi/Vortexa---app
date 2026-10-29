@@ -9,4 +9,8 @@
     <string name="music_sources_off_title">Online sources are off</string>
     <string name="music_sources_off_body">Nothing third-party runs until you turn it on. Settings → Online sources lets you enable the built-in direct-link source and add extractor plugins you install yourself.</string>
     <string name="music_open_settings">Open settings</string>
+    <string name="music_equalizer">Equalizer</string>
+    <string name="music_and_audio">Audio effects</string>
+    <string name="music_equalizer_off_hint">Turn this on to shape the sound of every stream and local file.</string>
+    <string name="music_close">Close</string>
 </resources>

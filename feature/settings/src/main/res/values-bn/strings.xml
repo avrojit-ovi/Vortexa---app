@@ -13,7 +13,7 @@
     <string name="settings_dynamic_color_summary">ওয়ালপেপারের রঙ ব্যবহার করুন (Android 12+)</string>
     <string name="settings_about">সম্পর্কে</string>
     <string name="settings_version">ভার্সন %1$s</string>
-    <string name="settings_license">প্রোপ্রাইটারি বিল্ড। সর্বস্বত্ব সংরক্ষিত।</string>
+    <string name="settings_license">GPL-3.0-or-later। সোর্স প্রকাশ্য।</string>
 
     <string name="settings_online">অনলাইন সোর্স (প্লাগিন)</string>
     <string name="settings_online_summary">ডিফল্টে বন্ধ। আপনি নিজে যে সোর্স যোগ করবেন, তার লিংক ও রেজাল্ট এখান থেকেই চলবে।</string>

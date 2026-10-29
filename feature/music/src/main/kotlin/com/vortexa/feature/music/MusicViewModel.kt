@@ -6,9 +6,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
+import androidx.media3.common.Player
+import com.vortexa.core.common.preferences.SettingsRepository
 import com.vortexa.core.media.ExtractorFailure
 import com.vortexa.core.media.MediaTrack
 import com.vortexa.core.online.OnlineSourcesRepository
+import com.vortexa.core.playback.EqualizerProfile
 import com.vortexa.core.playback.PlaybackService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -34,6 +37,8 @@ data class MusicUiState(
     val nowPlayingArtist: String? = null,
     val isPlaying: Boolean = false,
     val sleepTimerMinutes: Int? = null,
+    val equalizerEnabled: Boolean = false,
+    val equalizerBands: List<Int> = EqualizerProfile.flat(),
 ) {
     val canSearch: Boolean get() = sourcesEnabled && !searching
 }
@@ -50,6 +55,7 @@ data class MusicUiState(
 class MusicViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val online: OnlineSourcesRepository,
+    private val settings: SettingsRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MusicUiState())
@@ -58,7 +64,22 @@ class MusicViewModel @Inject constructor(
     private var controller: MediaController? = null
     private var playbackTicker: Job? = null
 
+    /** The search results become the queue; only the current item is resolved. */
+    private var queue: List<MediaTrack> = emptyList()
+    private var queueIndex: Int = -1
+    private var advancing = false
+
     init {
+        viewModelScope.launch {
+            settings.preferences.collect { preferences ->
+                _state.update {
+                    it.copy(
+                        equalizerEnabled = preferences.equalizerEnabled,
+                        equalizerBands = EqualizerProfile.decode(preferences.equalizerBands),
+                    )
+                }
+            }
+        }
         viewModelScope.launch {
             online.ensureLoaded()
             online.state.collect { sources ->
@@ -93,7 +114,23 @@ class MusicViewModel @Inject constructor(
         }
     }
 
-    fun play(track: MediaTrack) {
+    fun play(track: MediaTrack, results: List<MediaTrack> = emptyList()) {
+        val source = if (results.isEmpty()) listOf(track) else results
+        queue = source
+        queueIndex = source.indexOfFirst { it.extractorId == track.extractorId && it.id == track.id }
+            .takeIf { it >= 0 } ?: 0
+        playAt(queueIndex)
+    }
+
+    fun setEqualizer(enabled: Boolean, bands: List<Int>) {
+        val safe = EqualizerProfile.clampBands(bands)
+        _state.update { it.copy(equalizerEnabled = enabled, equalizerBands = safe) }
+        viewModelScope.launch { settings.setEqualizer(enabled, EqualizerProfile.encode(safe)) }
+    }
+
+    private fun playAt(index: Int) {
+        val track = queue.getOrNull(index) ?: return
+        queueIndex = index
         viewModelScope.launch {
             _state.update { it.copy(message = null) }
             val resolved = online.resolve(track)
@@ -156,9 +193,20 @@ class MusicViewModel @Inject constructor(
         playbackTicker = viewModelScope.launch {
             while (isActive) {
                 _state.update { it.copy(isPlaying = player.isPlaying) }
+                if (player.playbackState == Player.STATE_ENDED) playNext()
                 delay(700)
             }
         }
+    }
+
+    /** Lazily resolves the next queued item, so a dead link skips instead of stopping. */
+    private fun playNext() {
+        if (advancing) return
+        val next = queueIndex + 1
+        if (next !in queue.indices) return
+        advancing = true
+        playAt(next)
+        advancing = false
     }
 
     private suspend fun connect(): MediaController? {

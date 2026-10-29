@@ -24,6 +24,9 @@ data class UserPreferences(
     val languageTag: String = "system",
     /** Third-party extractor plugins. Off until the user turns them on. */
     val onlineSourcesEnabled: Boolean = false,
+    /** Equalizer switch and per-band gains in millibels, CSV: "-300,0,200,0,-100". */
+    val equalizerEnabled: Boolean = false,
+    val equalizerBands: String = "",
 )
 
 interface SettingsRepository {
@@ -32,6 +35,7 @@ interface SettingsRepository {
     suspend fun setDynamicColor(enabled: Boolean)
     suspend fun setLanguageTag(tag: String)
     suspend fun setOnlineSourcesEnabled(enabled: Boolean)
+    suspend fun setEqualizer(enabled: Boolean, bands: String)
 }
 
 // A single DataStore instance per process; the delegate enforces that.
@@ -46,6 +50,8 @@ class DataStoreSettingsRepository(
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val LANGUAGE_TAG = stringPreferencesKey("language_tag")
         val ONLINE_SOURCES = booleanPreferencesKey("online_sources_enabled")
+        val EQUALIZER_ENABLED = booleanPreferencesKey("equalizer_enabled")
+        val EQUALIZER_BANDS = stringPreferencesKey("equalizer_bands")
     }
 
     override val preferences: Flow<UserPreferences> = dataStore.data
@@ -56,6 +62,8 @@ class DataStoreSettingsRepository(
                 dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: true,
                 languageTag = prefs[Keys.LANGUAGE_TAG] ?: "system",
                 onlineSourcesEnabled = prefs[Keys.ONLINE_SOURCES] ?: false,
+                equalizerEnabled = prefs[Keys.EQUALIZER_ENABLED] ?: false,
+                equalizerBands = prefs[Keys.EQUALIZER_BANDS] ?: "",
             )
         }
 
@@ -73,6 +81,13 @@ class DataStoreSettingsRepository(
 
     override suspend fun setOnlineSourcesEnabled(enabled: Boolean) {
         dataStore.edit { it[Keys.ONLINE_SOURCES] = enabled }
+    }
+
+    override suspend fun setEqualizer(enabled: Boolean, bands: String) {
+        dataStore.edit {
+            it[Keys.EQUALIZER_ENABLED] = enabled
+            it[Keys.EQUALIZER_BANDS] = bands
+        }
     }
 }
 

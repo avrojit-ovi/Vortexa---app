@@ -12,6 +12,9 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionToken
+import com.vortexa.core.common.preferences.SettingsRepository
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,9 +29,13 @@ import kotlinx.coroutines.launch
  * playback survives leaving the screen, why the notification and headset
  * buttons work, and why there is only one audio focus holder.
  */
+@AndroidEntryPoint
 @androidx.annotation.OptIn(UnstableApi::class)
 class PlaybackService : MediaSessionService() {
 
+    @Inject lateinit var settings: SettingsRepository
+
+    private val equalizer = PlaybackEqualizer()
     private var player: ExoPlayer? = null
     private var session: MediaSession? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -61,7 +68,27 @@ class PlaybackService : MediaSessionService() {
 
         player = exoPlayer
         session = mediaSession
+
+        exoPlayer.addListener(object : androidx.media3.common.Player.Listener {
+            override fun onAudioSessionIdChanged(audioSessionId: Int) {
+                equalizer.attach(audioSessionId)
+                equalizer.apply(eqEnabled, EqualizerProfile.decode(eqBands))
+            }
+        })
+
+        // The equalizer lives in the service because the audio session does.
+        scope.launch {
+            settings.preferences.collect { preferences ->
+                eqEnabled = preferences.equalizerEnabled
+                eqBands = preferences.equalizerBands
+                equalizer.attach(exoPlayer.audioSessionId)
+                equalizer.apply(eqEnabled, EqualizerProfile.decode(eqBands))
+            }
+        }
     }
+
+    private var eqEnabled: Boolean = false
+    private var eqBands: String = ""
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = session
 
@@ -97,6 +124,7 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onDestroy() {
+        equalizer.release()
         sleepTimer?.cancel()
         session?.run {
             player.clearMediaItems()

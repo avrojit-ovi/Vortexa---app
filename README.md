@@ -2,7 +2,7 @@
 
 [![Android CI](https://github.com/avrojit-ovi/Vortexa---app/actions/workflows/android.yml/badge.svg)](https://github.com/avrojit-ovi/Vortexa---app/actions/workflows/android.yml)
 [![Latest release](https://img.shields.io/github/v/release/avrojit-ovi/Vortexa---app?display_name=tag)](https://github.com/avrojit-ovi/Vortexa---app/releases/latest)
-[![License](https://img.shields.io/badge/license-proprietary-lightgrey)](LICENSE)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 [![Min SDK](https://img.shields.io/badge/minSdk-26%20(Android%208)-3ddc84)](https://developer.android.com/about/versions/oreo)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4-7f52ff)](https://kotlinlang.org)
 
@@ -128,7 +128,7 @@ SponsorBlock. It ships disabled by default.
 
 ## Licence
 
-Proprietary, all rights reserved — see [LICENSE](LICENSE). Third-party
+GPL-3.0-or-later — see [LICENSE](LICENSE). Third-party
 components keep their own licences (Apache-2.0, MIT, LGPL-3.0).
 
 ---
