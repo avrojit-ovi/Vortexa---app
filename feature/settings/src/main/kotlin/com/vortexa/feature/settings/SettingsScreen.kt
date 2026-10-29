@@ -11,29 +11,40 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vortexa.core.common.preferences.ProxyType
 import com.vortexa.core.common.preferences.ThemeMode
 import com.vortexa.core.common.preferences.UserPreferences
 import com.vortexa.core.online.OnlineSourcesState
@@ -60,6 +71,7 @@ fun SettingsScreen(
         onDynamicColorChange = viewModel::setDynamicColor,
         onSpeedLimitChange = viewModel::setSpeedLimit,
         onScheduleChange = viewModel::setSchedule,
+        onProxyChange = viewModel::setProxy,
         onOnlineSourcesChange = viewModel::setOnlineSources,
         onReloadSources = viewModel::reloadSources,
         onAddPlugin = {
@@ -81,6 +93,7 @@ internal fun SettingsContent(
     onDynamicColorChange: (Boolean) -> Unit,
     onSpeedLimitChange: (Int) -> Unit,
     onScheduleChange: (Boolean, Int, Int) -> Unit,
+    onProxyChange: (Boolean, ProxyType, String, Int, String, String) -> Unit,
     onOnlineSourcesChange: (Boolean) -> Unit,
     onReloadSources: () -> Unit,
     onAddPlugin: () -> Unit,
@@ -136,6 +149,7 @@ internal fun SettingsContent(
             preferences = preferences,
             onSpeedLimitChange = onSpeedLimitChange,
             onScheduleChange = onScheduleChange,
+            onProxyChange = onProxyChange,
         )
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -172,6 +186,7 @@ private fun DownloadsSection(
     preferences: UserPreferences,
     onSpeedLimitChange: (Int) -> Unit,
     onScheduleChange: (Boolean, Int, Int) -> Unit,
+    onProxyChange: (Boolean, ProxyType, String, Int, String, String) -> Unit,
 ) {
     SectionHeader(text = stringResource(R.string.settings_downloads))
     Text(
@@ -230,6 +245,164 @@ private fun DownloadsSection(
             )
         }
     }
+
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+    ProxyRow(preferences = preferences, onChange = onProxyChange)
+}
+
+/** Proxy switch plus a dialog, because six fields do not belong inline in a list. */
+@Composable
+private fun ProxyRow(
+    preferences: UserPreferences,
+    onChange: (Boolean, ProxyType, String, Int, String, String) -> Unit,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.settings_proxy),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = if (preferences.proxyEnabled && preferences.proxyHost.isNotBlank()) {
+                    stringResource(
+                        R.string.settings_proxy_summary_on,
+                        preferences.proxyType.name,
+                        "${preferences.proxyHost}:${preferences.proxyPort}",
+                    )
+                } else {
+                    stringResource(R.string.settings_proxy_summary_off)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        TextButton(onClick = { showDialog = true }) {
+            Text(text = stringResource(R.string.settings_proxy_edit))
+        }
+        Switch(
+            checked = preferences.proxyEnabled,
+            onCheckedChange = { enabled ->
+                // The password is never echoed back: blank keeps the stored one.
+                onChange(
+                    enabled,
+                    preferences.proxyType,
+                    preferences.proxyHost,
+                    preferences.proxyPort,
+                    preferences.proxyUsername,
+                    "",
+                )
+            },
+        )
+    }
+
+    if (showDialog) {
+        ProxyDialog(
+            preferences = preferences,
+            onDismiss = { showDialog = false },
+            onSave = { type, host, port, username, password ->
+                onChange(true, type, host, port, username, password)
+                showDialog = false
+            },
+        )
+    }
+}
+
+@Composable
+private fun ProxyDialog(
+    preferences: UserPreferences,
+    onDismiss: () -> Unit,
+    onSave: (ProxyType, String, Int, String, String) -> Unit,
+) {
+    var type by remember { mutableStateOf(preferences.proxyType) }
+    var host by remember { mutableStateOf(preferences.proxyHost) }
+    var port by remember { mutableStateOf(preferences.proxyPort.toString()) }
+    var username by remember { mutableStateOf(preferences.proxyUsername) }
+    var password by remember { mutableStateOf("") }
+
+    val portValue = port.toIntOrNull()
+    val isValid = host.isNotBlank() && portValue != null && portValue in 1..65535
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.settings_proxy_title)) },
+        text = {
+            Column {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ProxyType.entries.forEach { option ->
+                        FilterChip(
+                            selected = type == option,
+                            onClick = { type = option },
+                            label = { Text(text = option.name) },
+                        )
+                    }
+                }
+                OutlinedTextField(
+                    value = host,
+                    onValueChange = { host = it },
+                    label = { Text(text = stringResource(R.string.settings_proxy_host)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = port,
+                    onValueChange = { port = it.filter(Char::isDigit).take(5) },
+                    label = { Text(text = stringResource(R.string.settings_proxy_port)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text(text = stringResource(R.string.settings_proxy_username)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text(text = stringResource(R.string.settings_proxy_password)) },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    supportingText = if (preferences.proxyHasPassword) {
+                        { Text(text = stringResource(R.string.settings_proxy_password_saved)) }
+                    } else {
+                        null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                if (!isValid) {
+                    Text(
+                        text = stringResource(R.string.settings_proxy_invalid),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = isValid,
+                onClick = { onSave(type, host, portValue ?: 0, username, password) },
+            ) {
+                Text(text = stringResource(R.string.settings_proxy_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.action_cancel))
+            }
+        },
+    )
 }
 
 /** Formatting shared with the engine's schedule, without importing it here. */

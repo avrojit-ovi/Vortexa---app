@@ -5,12 +5,15 @@ import android.os.Environment
 import com.vortexa.core.common.file.FileNameSanitizer
 import com.vortexa.core.database.dao.DownloadDao
 import com.vortexa.core.database.entity.DownloadEntity
+import com.vortexa.core.common.preferences.ProxyType
 import com.vortexa.core.common.preferences.SettingsRepository
 import com.vortexa.core.database.entity.DownloadStatus
 import com.vortexa.feature.downloader.engine.DownloadEngine
 import com.vortexa.feature.downloader.engine.DownloadEvent
 import com.vortexa.feature.downloader.engine.DownloadSchedule
 import com.vortexa.feature.downloader.engine.DownloadSpec
+import com.vortexa.feature.downloader.engine.ProxyKind
+import com.vortexa.feature.downloader.engine.ProxySettings
 import com.vortexa.feature.downloader.engine.SegmentCodec
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -40,7 +43,7 @@ class DownloadManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val dao: DownloadDao,
     private val engine: DownloadEngine,
-    settings: SettingsRepository,
+    private val settings: SettingsRepository,
 ) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -56,6 +59,9 @@ class DownloadManager @Inject constructor(
     @Volatile
     private var schedule = DownloadSchedule()
 
+    @Volatile
+    private var proxy: ProxySettings? = null
+
     init {
         // Both settings are read once and kept current, so a running download
         // picks up a new cap on its next chunk instead of needing a restart.
@@ -66,6 +72,16 @@ class DownloadManager @Inject constructor(
                     enabled = preferences.scheduleEnabled,
                     startMinuteOfDay = preferences.scheduleStartMinute,
                     endMinuteOfDay = preferences.scheduleEndMinute,
+                )
+                // Decrypted on the IO collector, never on the main thread; the header
+                // builder only ever sees a ready-to-use endpoint.
+                proxy = ProxySettings.from(
+                    enabled = preferences.proxyEnabled,
+                    kind = if (preferences.proxyType == ProxyType.SOCKS) ProxyKind.SOCKS else ProxyKind.HTTP,
+                    host = preferences.proxyHost,
+                    port = preferences.proxyPort,
+                    username = preferences.proxyUsername,
+                    password = if (preferences.proxyEnabled) settings.proxyPassword() else "",
                 )
             }
         }
@@ -158,6 +174,7 @@ class DownloadManager @Inject constructor(
             // Per-range offsets from the previous session; empty means fresh.
             resumeStates = SegmentCodec.decode(entity.segments),
             bytesPerSecond = speedLimitBytesPerSecond,
+            proxy = proxy,
         )
 
         var lastPersist = 0L

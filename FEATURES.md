@@ -36,7 +36,8 @@ Distribution: GitHub Releases + F-Droid only.
 | Category chips: name first, server MIME type (stored from the response) as fallback; a filter that loses its last row falls back to All | implemented + 10 unit tests | LOW |
 | Batch add: a pasted list (one link per line, or space/comma separated) is parsed, de-duplicated and queued; unusable tokens are skipped | implemented + 8 unit tests | LOW |
 | Clipboard offer: a copied http(s) link appears as a one-tap banner, hidden again while that link is already queued | implemented | LOW |
-| Proxy/auth, SD-card (SAF), custom folder, expired-link refresh, mirror URLs | planned | LOW |
+| Proxy: HTTP or SOCKS with optional auth; the password is encrypted with a Keystore key and a half-filled form falls back to a direct connection | implemented + 5 unit tests | LOW |
+| SD-card (SAF), custom folder, expired-link refresh, mirror URLs | planned | LOW |
 
 ## 4. Torrent + adaptive download · planned
 | Feature | Status | Risk |

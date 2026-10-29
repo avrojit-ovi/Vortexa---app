@@ -5,9 +5,11 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.vortexa.core.common.security.KeystoreSecretBox
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,6 +18,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 /** Everything the settings screen owns. Defaults are production defaults, not test values. */
@@ -42,6 +45,14 @@ data class UserPreferences(
     val scheduleEnabled: Boolean = false,
     val scheduleStartMinute: Int = 23 * 60,
     val scheduleEndMinute: Int = 6 * 60,
+    /** Downloads go through a proxy when this is on and [proxyHost] is set. */
+    val proxyEnabled: Boolean = false,
+    val proxyType: ProxyType = ProxyType.HTTP,
+    val proxyHost: String = "",
+    val proxyPort: Int = 8080,
+    val proxyUsername: String = "",
+    /** True when a password is stored; the secret itself never leaves the repository. */
+    val proxyHasPassword: Boolean = false,
 )
 
 interface SettingsRepository {
@@ -57,6 +68,22 @@ interface SettingsRepository {
     suspend fun setVaultPinHash(hash: String)
     suspend fun setSpeedLimitKbps(kbps: Int)
     suspend fun setDownloadSchedule(enabled: Boolean, startMinute: Int, endMinute: Int)
+
+    /**
+     * Stores the proxy. A blank [password] keeps the saved one, so changing the
+     * host does not force the user to retype their password every time.
+     */
+    suspend fun setProxy(
+        enabled: Boolean,
+        type: ProxyType,
+        host: String,
+        port: Int,
+        username: String,
+        password: String,
+    )
+
+    /** Decrypts the stored proxy password; "" when none is set or the key was invalidated. */
+    suspend fun proxyPassword(): String = ""
 }
 
 // A single DataStore instance per process; the delegate enforces that.
@@ -64,6 +91,7 @@ val Context.vortexaDataStore: DataStore<Preferences> by preferencesDataStore(nam
 
 class DataStoreSettingsRepository(
     private val dataStore: DataStore<Preferences>,
+    private val secretBox: KeystoreSecretBox = KeystoreSecretBox(),
 ) : SettingsRepository {
 
     private object Keys {
@@ -81,6 +109,12 @@ class DataStoreSettingsRepository(
         val SCHEDULE_ENABLED = booleanPreferencesKey("schedule_enabled")
         val SCHEDULE_START = intPreferencesKey("schedule_start_minute")
         val SCHEDULE_END = intPreferencesKey("schedule_end_minute")
+        val PROXY_ENABLED = booleanPreferencesKey("proxy_enabled")
+        val PROXY_TYPE = stringPreferencesKey("proxy_type")
+        val PROXY_HOST = stringPreferencesKey("proxy_host")
+        val PROXY_PORT = intPreferencesKey("proxy_port")
+        val PROXY_USERNAME = stringPreferencesKey("proxy_username")
+        val PROXY_PASSWORD = stringPreferencesKey("proxy_password")
     }
 
     override val preferences: Flow<UserPreferences> = dataStore.data
@@ -101,6 +135,12 @@ class DataStoreSettingsRepository(
                 scheduleEnabled = prefs[Keys.SCHEDULE_ENABLED] ?: false,
                 scheduleStartMinute = prefs[Keys.SCHEDULE_START] ?: 23 * 60,
                 scheduleEndMinute = prefs[Keys.SCHEDULE_END] ?: 6 * 60,
+                proxyEnabled = prefs[Keys.PROXY_ENABLED] ?: false,
+                proxyType = ProxyType.fromStorage(prefs[Keys.PROXY_TYPE]),
+                proxyHost = prefs[Keys.PROXY_HOST] ?: "",
+                proxyPort = prefs[Keys.PROXY_PORT] ?: 8080,
+                proxyUsername = prefs[Keys.PROXY_USERNAME] ?: "",
+                proxyHasPassword = !prefs[Keys.PROXY_PASSWORD].isNullOrEmpty(),
             )
         }
 
@@ -154,6 +194,33 @@ class DataStoreSettingsRepository(
             it[Keys.SCHEDULE_END] = endMinute.coerceIn(0, 24 * 60 - 1)
         }
     }
+
+    override suspend fun setProxy(
+        enabled: Boolean,
+        type: ProxyType,
+        host: String,
+        port: Int,
+        username: String,
+        password: String,
+    ) {
+        val secret = if (password.isNotEmpty()) secretBox.encrypt(password) else null
+        dataStore.edit {
+            it[Keys.PROXY_ENABLED] = enabled
+            it[Keys.PROXY_TYPE] = type.name
+            it[Keys.PROXY_HOST] = host.trim()
+            it[Keys.PROXY_PORT] = port.coerceIn(1, 65535)
+            it[Keys.PROXY_USERNAME] = username.trim()
+            if (secret != null) it[Keys.PROXY_PASSWORD] = secret
+        }
+    }
+
+    override suspend fun proxyPassword(): String {
+        val stored = dataStore.data
+            .catch { emit(emptyPreferences()) }
+            .map { it[Keys.PROXY_PASSWORD] ?: "" }
+            .first()
+        return secretBox.decrypt(stored)
+    }
 }
 
 @Module
@@ -163,5 +230,5 @@ object SettingsModule {
     @Provides
     @Singleton
     fun provideSettingsRepository(@ApplicationContext context: Context): SettingsRepository =
-        DataStoreSettingsRepository(context.vortexaDataStore)
+        DataStoreSettingsRepository(context.vortexaDataStore, KeystoreSecretBox())
 }

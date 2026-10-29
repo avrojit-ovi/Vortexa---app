@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vortexa.core.common.preferences.ProxyType
 import com.vortexa.core.common.preferences.SettingsRepository
 import com.vortexa.core.common.preferences.ThemeMode
 import com.vortexa.core.common.preferences.UserPreferences
@@ -60,6 +61,19 @@ class SettingsViewModel @Inject constructor(
     fun setSchedule(enabled: Boolean, startMinute: Int, endMinute: Int) {
         viewModelScope.launch {
             settingsRepository.setDownloadSchedule(enabled, startMinute, endMinute)
+        }
+    }
+
+    fun setProxy(
+        enabled: Boolean,
+        type: ProxyType,
+        host: String,
+        port: Int,
+        username: String,
+        password: String,
+    ) {
+        viewModelScope.launch {
+            settingsRepository.setProxy(enabled, type, host, port, username, password)
         }
     }
 

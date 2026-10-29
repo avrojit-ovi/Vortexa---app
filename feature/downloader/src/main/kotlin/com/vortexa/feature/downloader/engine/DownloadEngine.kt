@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import okhttp3.Credentials
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -41,6 +42,8 @@ data class DownloadSpec(
     val resumeStates: List<SegmentState> = emptyList(),
     /** Shared cap for the whole download; 0 means no limit. */
     val bytesPerSecond: Long = 0L,
+    /** Null means a direct connection. */
+    val proxy: ProxySettings? = null,
 )
 
 /**
@@ -61,13 +64,17 @@ class DownloadEngine(
 ) {
 
     /** Reads status, validators and length without downloading the body. */
-    suspend fun probe(url: HttpUrl, headers: Map<String, String> = emptyMap()): RemoteMetadata {
+    suspend fun probe(
+        url: HttpUrl,
+        headers: Map<String, String> = emptyMap(),
+        proxy: ProxySettings? = null,
+    ): RemoteMetadata {
         val request = requestBuilder(url, headers)
             .header("Range", "bytes=0-0")
             .get()
             .build()
 
-        client.newCall(request).execute().use { response ->
+        clientFor(proxy).newCall(request).execute().use { response ->
             if (!response.isSuccessful) {
                 throw DownloadHttpException(response.code, response.message)
             }
@@ -90,7 +97,8 @@ class DownloadEngine(
     }
 
     fun download(spec: DownloadSpec): Flow<DownloadEvent> = flow {
-        val metadata = probe(spec.url, spec.headers)
+        val http = clientFor(spec.proxy)
+        val metadata = probe(spec.url, spec.headers, spec.proxy)
         emit(DownloadEvent.Metadata(metadata))
 
         if (metadata.totalBytes <= 0L) {
@@ -111,7 +119,7 @@ class DownloadEngine(
                 // Sparse pre-allocation: the final size is known, holes are cheap.
                 raf.setLength(metadata.totalBytes)
                 val channel = raf.channel
-                downloadInto(spec, metadata, states, channel, alreadyOnDisk, limiter, emitter)
+                downloadInto(spec, metadata, states, channel, alreadyOnDisk, limiter, http, emitter)
             }
         } catch (io: java.io.IOException) {
             // The partial file is kept on purpose so the next run can resume it.
@@ -143,6 +151,7 @@ class DownloadEngine(
         channel: FileChannel,
         alreadyOnDisk: Long,
         limiter: RateLimiter,
+        http: OkHttpClient,
         emit: suspend (DownloadEvent) -> Unit,
     ) = coroutineScope {
         val lock = Any()
@@ -180,6 +189,7 @@ class DownloadEngine(
                 launch(Dispatchers.IO) {
                     fetchRange(
                         spec = spec,
+                        http = http,
                         start = state.start + state.downloaded,
                         end = state.end,
                         channel = channel,
@@ -215,6 +225,7 @@ class DownloadEngine(
 
     private suspend fun fetchRange(
         spec: DownloadSpec,
+        http: OkHttpClient,
         start: Long,
         end: Long,
         channel: FileChannel,
@@ -230,7 +241,7 @@ class DownloadEngine(
                     .get()
                     .build()
 
-                client.newCall(request).execute().use { response ->
+                http.newCall(request).execute().use { response ->
                     if (response.code != 206 && response.code != 200) {
                         throw DownloadHttpException(response.code, response.message)
                     }
@@ -272,6 +283,29 @@ class DownloadEngine(
             limiter.acquire(read)
             onBytes(writtenInRange)
         }
+    }
+
+    /**
+     * The injected client stays the default; a proxy needs its own client because
+     * OkHttp bakes the proxy and its authenticator into the client instance. The
+     * builder shares the connection pool and thread pools with the original.
+     */
+    private fun clientFor(proxy: ProxySettings?): OkHttpClient {
+        if (proxy == null) return client
+        val builder = client.newBuilder().proxy(proxy.toJavaProxy())
+        if (proxy.requiresAuth) {
+            builder.proxyAuthenticator { _, response ->
+                // Send the header once; repeating it on a second 407 would loop.
+                if (response.request.header("Proxy-Authorization") != null) {
+                    null
+                } else {
+                    response.request.newBuilder()
+                        .header("Proxy-Authorization", Credentials.basic(proxy.username, proxy.password))
+                        .build()
+                }
+            }
+        }
+        return builder.build()
     }
 
     private fun requestBuilder(url: HttpUrl, headers: Map<String, String>): Request.Builder {

@@ -32,4 +32,17 @@
     <string name="settings_speed_value">%1$d KB/s</string>
     <string name="settings_schedule">রাতের ডাউনলোড</string>
     <string name="settings_schedule_summary">কিউতে থাকা ডাউনলোড শুধু %1$s-এর মধ্যে শুরু হয়। চলমান ডাউনলোড চলতেই থাকে।</string>
+    <string name="settings_proxy">প্রক্সি</string>
+    <string name="settings_proxy_summary_off">সরাসরি সংযোগ</string>
+    <string name="settings_proxy_summary_on">%1$s দিয়ে %2$s</string>
+    <string name="settings_proxy_edit">সম্পাদনা</string>
+    <string name="settings_proxy_title">ডাউনলোড প্রক্সি</string>
+    <string name="settings_proxy_host">হোস্ট</string>
+    <string name="settings_proxy_port">পোর্ট</string>
+    <string name="settings_proxy_username">ইউজারনেম (ঐচ্ছিক)</string>
+    <string name="settings_proxy_password">পাসওয়ার্ড (ঐচ্ছিক)</string>
+    <string name="settings_proxy_password_saved">পাসওয়ার্ড সংরক্ষিত আছে — অপরিবর্তিত রাখতে খালি রাখুন</string>
+    <string name="settings_proxy_invalid">হোস্ট দিন এবং ১ থেকে ৬৫৫৩৫-এর মধ্যে পোর্ট দিন।</string>
+    <string name="settings_proxy_save">সংরক্ষণ</string>
+    <string name="action_cancel">বাতিল</string>
 </resources>

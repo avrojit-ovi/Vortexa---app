@@ -32,4 +32,17 @@
     <string name="settings_speed_value">%1$d KB/s</string>
     <string name="settings_schedule">Nightly downloads</string>
     <string name="settings_schedule_summary">Queued downloads only start between %1$s. Running downloads keep going.</string>
+    <string name="settings_proxy">Proxy</string>
+    <string name="settings_proxy_summary_off">Direct connection</string>
+    <string name="settings_proxy_summary_on">%1$s via %2$s</string>
+    <string name="settings_proxy_edit">Edit</string>
+    <string name="settings_proxy_title">Download proxy</string>
+    <string name="settings_proxy_host">Host</string>
+    <string name="settings_proxy_port">Port</string>
+    <string name="settings_proxy_username">Username (optional)</string>
+    <string name="settings_proxy_password">Password (optional)</string>
+    <string name="settings_proxy_password_saved">A password is saved — leave blank to keep it</string>
+    <string name="settings_proxy_invalid">Enter a host and a port from 1 to 65535.</string>
+    <string name="settings_proxy_save">Save</string>
+    <string name="action_cancel">Cancel</string>
 </resources>
