@@ -50,7 +50,9 @@ jobs:
 
   release:
     name: Signed release
-    if: startsWith(github.ref, 'refs/tags/v')
+    # Runs only when the repository variable SIGNING_ENABLED is "true" and the
+    # four VORTEXA_* signing secrets exist; otherwise a tag push would fail red.
+    if: startsWith(github.ref, 'refs/tags/v') && vars.SIGNING_ENABLED == 'true'
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 45

@@ -1,1 +1,1 @@
-e753157e47118912f4b4b50d9c605bd3a30a23bacd058255beda8f526ce124da  vortexa-0.1.0-phase2-release.apk
+599b581b4fcec76851528ad39b3e1f9761173c3f52a4bee37a22c089db3bfa0c  vortexa-0.2.0-release.apk

@@ -1,111 +1,134 @@
-# Vortexa
+# Vortexa — Android download manager, ad-free browser, video & music player
 
-**Vortexa** is a single Android app that merges a download manager, an ad-filtering
-browser, a full-featured video player and an audiophile music player — built
-clean-room from public feature descriptions.
+[![Android CI](https://github.com/avrojit-ovi/Vortexa---app/actions/workflows/android.yml/badge.svg)](https://github.com/avrojit-ovi/Vortexa---app/actions/workflows/android.yml)
+[![Latest release](https://img.shields.io/github/v/release/avrojit-ovi/Vortexa---app?display_name=tag)](https://github.com/avrojit-ovi/Vortexa---app/releases/latest)
+[![License](https://img.shields.io/badge/license-proprietary-lightgrey)](LICENSE)
+[![Min SDK](https://img.shields.io/badge/minSdk-26%20(Android%208)-3ddc84)](https://developer.android.com/about/versions/oreo)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4-7f52ff)](https://kotlinlang.org)
 
-- Package: `com.vortexa.app`
-- Min SDK 26 (Android 8.0) · target/compile SDK 37
-- Kotlin 2.4.21 · Jetpack Compose (Material 3) · AGP 9.4.1 · Gradle 9.6.1
-- License: **proprietary, all rights reserved** (see `LICENSE`)
+**Vortexa** is a single Android app that replaces four: a **segmented download
+manager**, an **ad-blocking browser**, a **gesture-driven video player** and an
+**audiophile music player** with equaliser — plus a private vault that ties them
+together. Built from scratch in Kotlin and Jetpack Compose (Material 3), with a
+Rust core for the hot paths.
 
-## What works today (Phase 1)
+> **Status: early build (v0.2.0).** The foundation, theme, settings and the
+> download engine are working and tested; the browser and both players are the
+> next phases. Screens that are not implemented say so — they never show a fake UI.
 
-| Area | State |
-|---|---|
-| Multi-module Gradle build (10 modules) | ✅ builds |
-| Material 3 theme: light / dark / AMOLED / Material You | ✅ |
-| 5-tab navigation (Downloads, Browser, Video, Music, More) | ✅ |
-| Settings: theme mode + dynamic colour, persisted in DataStore | ✅ |
-| Room database + `downloads` table and DAO | ✅ (schema exported) |
-| Hilt dependency injection across all modules | ✅ |
-| English + Bangla strings | ✅ |
-| Unit tests (formatters, filename sanitizer, download status) | ✅ |
-| Rust download core: range planning, resume decisions, checksums | ✅ (21 cargo tests) |
-| Kotlin segmented download engine: ranges, retry, progress, checksum | ✅ (16 JVM tests) |
-| Queue/notification UI, browser, players | ⏳ phases 3–7 |
+## Download
 
-Unimplemented screens show an explicit "Phase N" badge instead of a fake UI.
-
-Download engine tests run against a real local HTTP server (sockets, `Range`,
-`206 Partial Content`, ETag), not mocks:
+Grab the signed APK from the [latest release](https://github.com/avrojit-ovi/Vortexa---app/releases/latest):
 
 ```bash
-./gradlew :feature:downloader:testDebugUnitTest
-cd rust/download-core && cargo test
+adb install vortexa-0.2.0-release.apk
 ```
 
-See [docs/FEATURE_MATRIX.md](docs/FEATURE_MATRIX.md) for the full plan and
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for module boundaries.
+`minSdk 26 (Android 8.0)` · `arm64-v8a`, `armeabi-v7a`, `x86_64` · no Play Services required.
 
-## Build
+## Why people look for an app like this
 
-Requirements: JDK 17, Android SDK with platform 37.
+| What you want | What Vortexa does |
+|---|---|
+| A download manager that survives bad networks | Up to 32 parallel byte ranges, resume that validates ETag/Last-Modified before trusting a partial file, exponential-backoff retries, single-connection fallback when a server ignores `Range` |
+| A browser without ads | Planned: own EasyList/uBlock-style filter engine on WebView, per-site allow list, media sniffer (phase 5) |
+| A video player with real controls | Planned: Media3/ExoPlayer with HW/HW+/SW switch, gestures, subtitle styling (phase 6) |
+| A music player with a serious EQ | Planned: graphic + parametric EQ via `AudioEffect`/`DynamicsProcessing`, later a native DSP (phase 7) |
+| One app instead of four | Shared library, unified search, global mini-player, private vault (phase 8) |
+
+## What works today (v0.2.0)
+
+- **Multi-module Kotlin/Compose app** — 10 Gradle modules, Hilt, Room, DataStore, type-safe version catalog.
+- **Material 3 theme** — light, dark, true-black **AMOLED**, and wallpaper colours (Material You).
+- **Five-tab shell** — Downloads · Browser · Video · Music · More, with SlidingContent transitions.
+- **Settings that actually work** — theme mode and dynamic colour persist in DataStore and repaint the app instantly.
+- **Segmented download engine** — range probing, parallel ranged download, progress flow with live speed, retry, checksum (SHA-256/MD5/SHA-1).
+- **Rust core** — range planning, resume decisions and streaming hashes, 21 unit tests, same test vectors as the Kotlin planner.
+- **English + বাংলা** localisation, edge-to-edge, adaptive icon, RTL-ready.
+- **29 JVM tests + 21 Rust tests**, Android Lint clean (0 errors).
+
+Download engine tests run against a **real local HTTP server** (sockets, `206 Partial Content`, ETag, 500-then-200), not mocks:
+
+```bash
+./gradlew :feature:downloader:testDebugUnitTest   # 16 tests
+cd rust/download-core && cargo test               # 21 tests
+```
+
+## Build from source
+
+Requirements: JDK 17, Android SDK platform 37.
 
 ```bash
 ./gradlew :app:assembleDebug        # debug APK
 ./gradlew check testDebugUnitTest   # lint + unit tests
-./gradlew :app:assembleRelease      # release APK (needs a keystore, see below)
+./gradlew :app:assembleRelease      # release APK (needs a keystore)
 ```
 
-The debug build installs alongside release builds because its application id is
-`com.vortexa.app.debug`.
+## Project layout
 
-## Renaming the app
+```
+:app                  navigation shell, theme wiring, application
+:core:common          formatters, filename sanitiser, DataStore settings
+:core:ui              Material 3 design system + shared composables
+:core:database        Room entities, DAOs, exported schemas
+:feature:downloader   download engine + downloads screen
+:feature:browser      (phase 5)
+:feature:video        (phase 6)
+:feature:music        (phase 7)
+:feature:vault        (phase 8)
+:feature:settings     working settings screen
+rust/download-core    native core: ranges, resume validation, checksums
+```
 
-Everything is derived from `gradle.properties`:
+More: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [docs/FEATURE_MATRIX.md](docs/FEATURE_MATRIX.md)
+
+## Renaming / rebranding
+
+Identity lives in one file — `gradle.properties`:
 
 ```properties
 vortexa.appName=Vortexa
 vortexa.appId=com.vortexa.app
-vortexa.versionCode=1
-vortexa.versionName=0.1.0-phase1
+vortexa.versionCode=2
+vortexa.versionName=0.2.0
 ```
-
-Change those four values and the label, application id and `@string/app_name`
-follow. Kotlin namespaces under `com.vortexa.*` and the app icon must be renamed
-separately if the package changes.
 
 ## Signing
 
 `app/build.gradle.kts` reads an optional `keystore.properties` in the project
-root:
+root (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`). Both
+`keystore.properties` and `.secret/` are git-ignored.
 
-```properties
-storeFile=.secret/vortexa-release.jks
-storePassword=...
-keyAlias=vortexa
-keyPassword=...
-```
+For CI releases set the repository variable `SIGNING_ENABLED=true` and these
+secrets: `VORTEXA_KEYSTORE_BASE64`, `VORTEXA_STORE_PASSWORD`,
+`VORTEXA_KEY_ALIAS`, `VORTEXA_KEY_PASSWORD`. A tag push (`v*`) then builds and
+attaches a signed APK and AAB; without the variable the release job is skipped
+instead of failing.
 
-Both `keystore.properties` and `.secret/` are git-ignored. For CI, add the
-GitHub Actions secrets used by `.github/workflows/android.yml`:
-`VORTEXA_KEYSTORE_BASE64` (`base64 -w0 .secret/vortexa-release.jks`),
-`VORTEXA_STORE_PASSWORD`, `VORTEXA_KEY_ALIAS`, `VORTEXA_KEY_PASSWORD`.
-
-> Keep the keystore backed up. Without it you cannot ship an update over an
-> already-installed build.
+> Back up the keystore. Without it you cannot ship an update over an installed build.
 
 ## Distribution
 
-GitHub Releases (`.github/workflows/android.yml`, tag `v*`) is the supported
-channel. **F-Droid cannot host Vortexa while the licence is proprietary** —
-F-Droid only accepts free/open-source licences. If that matters, switch the
-licence first (Apache-2.0 is the least surprising choice for this stack).
+GitHub Releases is the supported channel. **F-Droid cannot host Vortexa while
+the licence is proprietary** — F-Droid only accepts free/open-source licences.
 
 ## Deliberate limits
 
 Vortexa does **not** implement YouTube ad bypassing, background play of YouTube
 content, Premium unlocking, or YouTube downloading. Those break YouTube's Terms
 of Service and the anti-circumvention rules around protected content. The
-optional Online Video module (phase 9) will instead offer the official embed
-player, a pluggable extractor interface for lawful sources, and community APIs
-such as SponsorBlock. It ships disabled by default and can be removed at build
-time.
+optional Online Video module (phase 9) instead offers the official embed player,
+a pluggable extractor interface for lawful sources and community APIs such as
+SponsorBlock. It ships disabled by default.
 
-## Third-party licences
+## Licence
 
-Room (Apache-2.0), OkHttp (Apache-2.0), Media3 (Apache-2.0), Hilt (Apache-2.0),
-libtorrent via jlibtorrent (MIT) and FFmpeg (LGPL-3.0 build only) will be listed
-in the in-app "Open source licences" screen once those phases land. No GPL build
-of FFmpeg is used.
+Proprietary, all rights reserved — see [LICENSE](LICENSE). Third-party
+components keep their own licences (Apache-2.0, MIT, LGPL-3.0).
+
+---
+
+**Keywords:** android download manager · idm alternative android · 1dm alternative ·
+adblock browser android · mx player alternative · poweramp alternative ·
+jetpack compose app · kotlin download manager · segmented download · resume download ·
+media3 exoplayer · android music player equalizer · torrent client android (planned)
