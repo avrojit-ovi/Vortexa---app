@@ -23,4 +23,11 @@
     <string name="status_completed">সম্পন্ন</string>
     <string name="status_failed">ব্যর্থ — চালু করতে প্লে চাপুন</string>
     <string name="status_canceled">বাতিল</string>
+    <string name="action_pause_all">সব বিরতি দিন</string>
+    <string name="notification_channel_downloads">ডাউনলোড</string>
+    <string name="notification_channel_downloads_summary">চলমান ডাউনলোডের অগ্রগতি</string>
+    <plurals name="downloads_active">
+        <item quantity="one">%1$d টি ডাউনলোড চলছে</item>
+        <item quantity="other">%1$d টি ডাউনলোড চলছে</item>
+    </plurals>
 </resources>

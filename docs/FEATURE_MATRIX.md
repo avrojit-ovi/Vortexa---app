@@ -9,7 +9,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · ⛔ not built on purpose
 | Resume: ETag/Last-Modified/size validation + per-part offsets in Room | ✅ |
 | Safe single-connection fallback without ranges | ✅ |
 | Retry with exponential backoff | ✅  ·  queue, speed limiter, proxy/auth ⏳ |
-| Foreground service + notifications | ⏳ (downloads currently stop with the app process) |
+| Foreground service (dataSync) + aggregate notification with Pause all | ✅ |
 | Torrent (jlibtorrent), HLS/DASH, FFmpeg merge | ⏳ |
 | Checksums (SHA-256 / MD5 / SHA-1, streaming) | ✅  ·  categories, SD-card ⏳ |
 

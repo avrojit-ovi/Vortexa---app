@@ -66,6 +66,7 @@ class DownloadManager @Inject constructor(
 
     fun start(id: Long) {
         if (jobs[id]?.isActive == true) return
+        DownloadService.ensureRunning(context)
         jobs[id] = scope.launch {
             runCatching { runDownload(id) }.onFailure { error ->
                 dao.updateStatus(id, DownloadStatus.FAILED)
@@ -78,6 +79,10 @@ class DownloadManager @Inject constructor(
         jobs.remove(id)?.cancel()
         _speeds.update { it - id }
         scope.launch { dao.updateStatus(id, DownloadStatus.PAUSED) }
+    }
+
+    fun pauseAll() {
+        jobs.keys.toList().forEach { pause(it) }
     }
 
     fun cancel(id: Long) {
