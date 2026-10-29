@@ -55,7 +55,8 @@ Distribution: GitHub Releases + F-Droid only.
 | Resume position per file (credits guard) | implemented + unit tests | LOW |
 | Speed presets, fit/fill, ±10 s seek, picture-in-picture | implemented | LOW |
 | Sidecar subtitles (`movie.srt`, `movie.en.srt`, `movie.bn.ass`) + CC on/off | implemented + 5 unit tests | LOW |
-| Gestures (brightness/volume/seek), subtitle styling/delay, decoder switch, Kids Lock | planned | LOW |
+| Gestures: horizontal swipe seeks, left half = brightness, right half = volume, with a HUD | implemented + 8 unit tests | LOW |
+| Subtitle styling/delay, decoder switch, Kids Lock | planned | LOW |
 
 ## 7. Music · in progress
 | Feature | Status | Risk |

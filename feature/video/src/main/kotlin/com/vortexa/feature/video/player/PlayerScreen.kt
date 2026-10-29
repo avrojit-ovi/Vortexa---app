@@ -1,10 +1,14 @@
 package com.vortexa.feature.video.player
 
+import android.app.Activity
 import android.content.ComponentName
+import android.content.Context
 import android.graphics.Color as AndroidColor
+import android.media.AudioManager
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -88,6 +93,8 @@ fun PlayerScreen(
     var zoomed by remember { mutableStateOf(false) }
     var captionsEnabled by remember { mutableStateOf(false) }
     var subtitlesPresent by remember(path) { mutableStateOf(false) }
+    var gestureHint by remember { mutableStateOf<String?>(null) }
+    val activity = context as? Activity
 
     BackHandler(onBack = onBack)
 
@@ -185,6 +192,112 @@ fun PlayerScreen(
             },
             modifier = Modifier.fillMaxSize(),
         )
+
+        // Gestures sit under the controls: empty areas respond, buttons still win.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(controller, durationMs) {
+                    var axis = DragAxis.NONE
+                    var dx = 0f
+                    var dy = 0f
+                    var basePosition = 0L
+                    var baseLevel = 0f
+                    var leftSide = true
+
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            axis = DragAxis.NONE
+                            dx = 0f
+                            dy = 0f
+                            basePosition = controller?.currentPosition ?: positionMs
+                            leftSide = GestureMath.sideOf(offset.x, size.width)
+                            baseLevel = if (leftSide) {
+                                activity?.window?.attributes?.screenBrightness ?: -1f
+                            } else {
+                                val audio = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+                                val max = audio?.getStreamMaxVolume(AudioManager.STREAM_MUSIC) ?: 0
+                                if (max > 0) {
+                                    audio!!.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat() / max
+                                } else {
+                                    0f
+                                }
+                            }
+                        },
+                        onDragEnd = {
+                            if (axis == DragAxis.HORIZONTAL && durationMs > 0L) {
+                                val target = GestureMath.seekTarget(
+                                    basePosition,
+                                    durationMs,
+                                    dx / size.width,
+                                )
+                                controller?.seekTo(target)
+                                positionMs = target
+                            }
+                            gestureHint = null
+                        },
+                        onDragCancel = { gestureHint = null },
+                        onDrag = { change, drag ->
+                            change.consume()
+                            dx += drag.x
+                            dy += drag.y
+                            if (axis == DragAxis.NONE) axis = GestureMath.axis(dx, dy)
+
+                            when (axis) {
+                                DragAxis.HORIZONTAL -> {
+                                    val target = GestureMath.seekTarget(
+                                        basePosition,
+                                        durationMs,
+                                        dx / size.width,
+                                    )
+                                    gestureHint = PlaybackClock.format(target) +
+                                        "  (" + GestureMath.seekDeltaLabel(target - basePosition) + ")"
+                                }
+
+                                DragAxis.VERTICAL -> {
+                                    val fraction = -dy / size.height
+                                    if (leftSide) {
+                                        val level = GestureMath.brightnessAfter(baseLevel, fraction)
+                                        activity?.window?.let { window ->
+                                            val attributes = window.attributes
+                                            attributes.screenBrightness = level
+                                            window.attributes = attributes
+                                        }
+                                        gestureHint = "Brightness " + (level * 100).toInt() + "%"
+                                    } else {
+                                        val audio = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+                                        val max = audio?.getStreamMaxVolume(AudioManager.STREAM_MUSIC) ?: 0
+                                        if (audio != null && max > 0) {
+                                            val current = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
+                                            val target = GestureMath.volumeIndexAfter(current, max, fraction)
+                                            audio.setStreamVolume(AudioManager.STREAM_MUSIC, target, 0)
+                                            gestureHint = "Volume " + (target * 100 / max) + "%"
+                                        }
+                                    }
+                                }
+
+                                DragAxis.NONE -> Unit
+                            }
+                        },
+                    )
+                },
+        )
+
+        gestureHint?.let { hint ->
+            Text(
+                text = hint,
+                color = androidx.compose.ui.graphics.Color.White,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 56.dp)
+                    .background(
+                        color = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.6f),
+                        shape = RoundedCornerShape(8.dp),
+                    )
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+            )
+        }
 
         if (isBuffering && !isEnded) {
             CircularProgressIndicator(
