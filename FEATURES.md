@@ -105,7 +105,7 @@ opens instead of failing.
 | PIN gate: PBKDF2-HMAC-SHA256 (120k iterations, per-setup salt), never stored in clear | implemented + 6 unit tests | LOW |
 | Fingerprint/face shortcut through the platform prompt (API 28+), PIN stays as the fallback | implemented, not device-verified | MED |
 | Import from SAF, list, delete, open into the cache for the player | implemented | LOW |
-| Unified search across downloads, vault and local music | planned | LOW |
+| Unified search across finished downloads and local music (vault names stay hidden until it is unlocked, so search cannot bypass it) | implemented + 8 unit tests | LOW |
 | Unified search across downloads/video/music, mini-player | mini-player implemented | LOW |
 
 ## 10. Polish & release · planned

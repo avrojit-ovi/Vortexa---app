@@ -26,6 +26,7 @@ import com.vortexa.app.R
 fun MoreScreen(
     onOpenVault: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenSearch: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -34,6 +35,13 @@ fun MoreScreen(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
+        MoreRow(
+            iconRes = R.drawable.ic_search,
+            title = stringResource(R.string.more_search_title),
+            summary = stringResource(R.string.more_search_summary),
+            onClick = onOpenSearch,
+        )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         MoreRow(
             iconRes = com.vortexa.core.ui.R.drawable.ic_tab_vault,
             title = stringResource(R.string.destination_vault),

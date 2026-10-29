@@ -33,6 +33,7 @@ import com.vortexa.app.R
 import com.vortexa.app.navigation.Routes
 import com.vortexa.app.navigation.TopLevelDestination
 import com.vortexa.feature.browser.BrowserScreen
+import com.vortexa.app.search.SearchScreen
 import com.vortexa.feature.downloader.DownloadsScreen
 import com.vortexa.feature.music.MusicScreen
 import com.vortexa.feature.onlinevideo.EmbedPlayerScreen
@@ -121,6 +122,7 @@ fun VortexaApp(modifier: Modifier = Modifier) {
                 MoreScreen(
                     onOpenVault = { navController.navigate(Routes.VAULT) },
                     onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                    onOpenSearch = { navController.navigate(Routes.SEARCH) },
                 )
             }
             composable(Routes.VAULT) {
@@ -131,6 +133,13 @@ fun VortexaApp(modifier: Modifier = Modifier) {
                 )
             }
             composable(Routes.SETTINGS) { SettingsScreen() }
+            composable(Routes.SEARCH) {
+                SearchScreen(
+                    onOpen = { path, title ->
+                        navController.navigate(Routes.player(path, title))
+                    },
+                )
+            }
             composable(
                 route = Routes.EMBED,
                 arguments = listOf(
@@ -205,6 +214,7 @@ private fun VortexaBottomBar(
 @Composable
 private fun titleFor(route: String?): String = when (route) {
     Routes.VAULT -> stringResource(R.string.destination_vault)
+    Routes.SEARCH -> stringResource(R.string.more_search_title)
     Routes.SETTINGS -> stringResource(R.string.destination_settings)
     else -> {
         val destination = TopLevelDestination.entries.firstOrNull { it.route == route }

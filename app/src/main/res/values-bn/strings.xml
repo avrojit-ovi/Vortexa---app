@@ -12,4 +12,12 @@
     <string name="more_settings_summary">থিম, ভাষা, স্টোরেজ আর নেটওয়ার্ক</string>
     <string name="mini_player_play">চালান</string>
     <string name="mini_player_pause">থামান</string>
+    <string name="more_search_title">সব কিছু খুঁজুন</string>
+    <string name="more_search_summary">এই ডিভাইসের ডাউনলোড আর মিউজিক</string>
+    <string name="search_hint">ডাউনলোড বা গান খুঁজুন</string>
+    <string name="search_prompt">ডাউনলোড আর মিউজিকের মধ্যে খুঁজতে লেখা শুরু করুন।</string>
+    <string name="search_too_short">অন্তত দুটো অক্ষর লিখুন।</string>
+    <string name="search_empty">এই ডিভাইসে এর সাথে মেলে এমন কিছু নেই।</string>
+    <string name="search_source_download">ডাউনলোড</string>
+    <string name="search_source_music">মিউজিক</string>
 </resources>

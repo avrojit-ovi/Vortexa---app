@@ -24,6 +24,7 @@ enum class TopLevelDestination(
 object Routes {
     const val VAULT = "vault"
     const val SETTINGS = "settings"
+    const val SEARCH = "search"
 
     /** Full-screen player; the shell hides its bars while this is on top. */
     const val PLAYER_PREFIX = "player"

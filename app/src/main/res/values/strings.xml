@@ -12,4 +12,12 @@
     <string name="more_settings_summary">Theme, language, storage and network</string>
     <string name="mini_player_play">Play</string>
     <string name="mini_player_pause">Pause</string>
+    <string name="more_search_title">Search everything</string>
+    <string name="more_search_summary">Downloads and music on this device</string>
+    <string name="search_hint">Find a download or a song</string>
+    <string name="search_prompt">Start typing to search your downloads and music.</string>
+    <string name="search_too_short">Type at least two characters.</string>
+    <string name="search_empty">Nothing on this device matches that.</string>
+    <string name="search_source_download">DOWNLOAD</string>
+    <string name="search_source_music">MUSIC</string>
 </resources>

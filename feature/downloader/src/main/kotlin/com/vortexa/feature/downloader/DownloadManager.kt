@@ -163,6 +163,9 @@ class DownloadManager @Inject constructor(
         }
     }
 
+    /** Where a finished download lives, for the player and for search. */
+    fun fileFor(fileName: String): File = targetFile(fileName)
+
     private fun targetFile(fileName: String): File {
         val directory = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
             ?: File(context.filesDir, "downloads")
