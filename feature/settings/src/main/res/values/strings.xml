@@ -29,6 +29,11 @@
     <string name="settings_downloads">Downloads</string>
     <string name="settings_speed_limit">Speed limit</string>
     <string name="settings_speed_unlimited">Unlimited</string>
+    <string name="settings_download_folder">Download folder</string>
+    <string name="settings_download_folder_app">App storage (default)</string>
+    <string name="settings_download_folder_custom">Custom folder (new downloads only)</string>
+    <string name="settings_download_folder_pick">Choose</string>
+    <string name="settings_download_folder_reset">Reset</string>
     <string name="settings_speed_value">%1$d KB/s</string>
     <string name="settings_schedule">Nightly downloads</string>
     <string name="settings_schedule_summary">Queued downloads only start between %1$s. Running downloads keep going.</string>

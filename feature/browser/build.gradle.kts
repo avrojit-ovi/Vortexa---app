@@ -20,7 +20,9 @@ kotlin { compilerOptions { jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 dependencies {
     implementation(project(":core:ui"))
+    implementation(project(":core:database"))
     implementation(project(":core:common"))
+    implementation(project(":core:database"))
     implementation(project(":feature:downloader"))
 
     implementation(libs.hilt.android)

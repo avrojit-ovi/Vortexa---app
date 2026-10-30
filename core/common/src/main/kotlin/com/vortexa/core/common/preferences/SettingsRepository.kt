@@ -53,6 +53,8 @@ data class UserPreferences(
     val proxyUsername: String = "",
     /** True when a password is stored; the secret itself never leaves the repository. */
     val proxyHasPassword: Boolean = false,
+    /** SAF tree URI of a user-picked folder (e.g. SD card); empty means app storage. */
+    val downloadTreeUri: String = "",
 )
 
 interface SettingsRepository {
@@ -68,6 +70,7 @@ interface SettingsRepository {
     suspend fun setVaultPinHash(hash: String)
     suspend fun setSpeedLimitKbps(kbps: Int)
     suspend fun setDownloadSchedule(enabled: Boolean, startMinute: Int, endMinute: Int)
+    suspend fun setDownloadTreeUri(uri: String)
 
     /**
      * Stores the proxy. A blank [password] keeps the saved one, so changing the
@@ -115,6 +118,7 @@ class DataStoreSettingsRepository(
         val PROXY_PORT = intPreferencesKey("proxy_port")
         val PROXY_USERNAME = stringPreferencesKey("proxy_username")
         val PROXY_PASSWORD = stringPreferencesKey("proxy_password")
+        val DOWNLOAD_TREE_URI = stringPreferencesKey("download_tree_uri")
     }
 
     override val preferences: Flow<UserPreferences> = dataStore.data
@@ -141,6 +145,7 @@ class DataStoreSettingsRepository(
                 proxyPort = prefs[Keys.PROXY_PORT] ?: 8080,
                 proxyUsername = prefs[Keys.PROXY_USERNAME] ?: "",
                 proxyHasPassword = !prefs[Keys.PROXY_PASSWORD].isNullOrEmpty(),
+                downloadTreeUri = prefs[Keys.DOWNLOAD_TREE_URI] ?: "",
             )
         }
 
@@ -185,6 +190,10 @@ class DataStoreSettingsRepository(
 
     override suspend fun setSpeedLimitKbps(kbps: Int) {
         dataStore.edit { it[Keys.SPEED_LIMIT_KBPS] = kbps.coerceAtLeast(0) }
+    }
+
+    override suspend fun setDownloadTreeUri(uri: String) {
+        dataStore.edit { it[Keys.DOWNLOAD_TREE_URI] = uri }
     }
 
     override suspend fun setDownloadSchedule(enabled: Boolean, startMinute: Int, endMinute: Int) {

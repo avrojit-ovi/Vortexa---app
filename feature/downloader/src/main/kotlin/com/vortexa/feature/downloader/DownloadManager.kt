@@ -1,7 +1,10 @@
 package com.vortexa.feature.downloader
 
 import android.content.Context
+import android.net.Uri
 import android.os.Environment
+import android.os.ParcelFileDescriptor
+import android.provider.DocumentsContract
 import com.vortexa.core.common.file.FileNameSanitizer
 import com.vortexa.core.database.dao.DownloadDao
 import com.vortexa.core.database.entity.DownloadEntity
@@ -11,12 +14,16 @@ import com.vortexa.core.database.entity.DownloadStatus
 import com.vortexa.feature.downloader.engine.DownloadEngine
 import com.vortexa.feature.downloader.engine.DownloadEvent
 import com.vortexa.feature.downloader.engine.DownloadSchedule
+import com.vortexa.feature.downloader.engine.DownloadSink
 import com.vortexa.feature.downloader.engine.DownloadSpec
 import com.vortexa.feature.downloader.engine.ProxyKind
 import com.vortexa.feature.downloader.engine.ProxySettings
 import com.vortexa.feature.downloader.engine.SegmentCodec
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.nio.channels.FileChannel
 import java.util.Calendar
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -154,7 +161,15 @@ class DownloadManager @Inject constructor(
         _speeds.update { it - id }
         scope.launch {
             dao.updateStatus(id, DownloadStatus.CANCELED)
-            targetFile(dao.findById(id)?.fileName ?: return@launch).delete()
+            val row = dao.findById(id) ?: return@launch
+            val safDocument = row.directory?.takeIf { it.startsWith("content:") }
+            if (safDocument != null) {
+                runCatching {
+                    DocumentsContract.deleteDocument(context.contentResolver, Uri.parse(safDocument))
+                }
+            } else {
+                targetFile(row.fileName).delete()
+            }
         }
     }
 
@@ -167,9 +182,22 @@ class DownloadManager @Inject constructor(
         val entity = dao.findById(id) ?: return
         dao.updateStatus(id, DownloadStatus.RUNNING)
 
+        // A chosen folder is a SAF tree; the document created inside it is saved in
+        // `directory` so resume and delete reuse the same file. Without a folder the
+        // download stays in app storage, as before.
+        val tree = settings.preferences.first().downloadTreeUri
+        var safDocument: Uri? = entity.directory?.takeIf { it.startsWith("content:") }?.let { Uri.parse(it) }
+        if (safDocument == null && tree.isNotEmpty()) {
+            safDocument = createSafDocument(Uri.parse(tree), entity.fileName)
+            if (safDocument != null) dao.upsert(entity.copy(directory = safDocument.toString()))
+        }
+        val document = safDocument
+        var lastTotal = 0L
+
         val spec = DownloadSpec(
             url = entity.url.toHttpUrl(),
             file = targetFile(entity.fileName),
+            openSink = document?.let { uri -> { _: Long -> SafFileSink(context, uri) } },
             partCount = entity.segmentCount,
             // Per-range offsets from the previous session; empty means fresh.
             resumeStates = SegmentCodec.decode(entity.segments),
@@ -200,6 +228,7 @@ class DownloadManager @Inject constructor(
 
                 is DownloadEvent.Progress -> {
                     _speeds.update { it + (id to event.bytesPerSecond) }
+                    lastTotal = event.totalBytes
                     val now = System.currentTimeMillis()
                     if (now - lastPersist >= PERSIST_INTERVAL_MS) {
                         lastPersist = now
@@ -214,10 +243,11 @@ class DownloadManager @Inject constructor(
 
                 DownloadEvent.Completed -> {
                     _speeds.update { it - id }
+                    val size = if (document != null) lastTotal else spec.file.length()
                     dao.updateProgressDetail(
                         id = id,
-                        bytes = spec.file.length(),
-                        total = spec.file.length(),
+                        bytes = size,
+                        total = size,
                         segments = null,
                     )
                     dao.updateStatus(id, DownloadStatus.COMPLETED)
@@ -233,6 +263,14 @@ class DownloadManager @Inject constructor(
         }
     }
 
+    private fun createSafDocument(tree: Uri, fileName: String): Uri? = runCatching {
+        val parent = DocumentsContract.buildDocumentUriUsingTree(
+            tree,
+            DocumentsContract.getTreeDocumentId(tree),
+        )
+        DocumentsContract.createDocument(context.contentResolver, parent, "application/octet-stream", fileName)
+    }.getOrNull()
+
     /** Where a finished download lives, for the player and for search. */
     fun fileFor(fileName: String): File = targetFile(fileName)
 
@@ -247,5 +285,22 @@ class DownloadManager @Inject constructor(
         const val DEFAULT_PARTS = 8
         private const val PERSIST_INTERVAL_MS = 1_000L
         private const val SCHEDULE_CHECK_MS = 60_000L
+    }
+}
+
+/** Writes a download into a SAF document through a file descriptor. */
+private class SafFileSink(context: Context, uri: Uri) : DownloadSink {
+    private val pfd: ParcelFileDescriptor =
+        context.contentResolver.openFileDescriptor(uri, "rw")
+            ?: throw IOException("Cannot open $uri")
+    private val stream = FileOutputStream(pfd.fileDescriptor)
+
+    override val channel: FileChannel get() = stream.channel
+
+    override fun length(): Long = stream.channel.size()
+
+    override fun close() {
+        runCatching { stream.close() }
+        pfd.close()
     }
 }

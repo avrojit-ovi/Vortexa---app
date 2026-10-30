@@ -58,6 +58,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setSpeedLimitKbps(kbps) }
     }
 
+    fun setDownloadTreeUri(uri: String) {
+        viewModelScope.launch { settingsRepository.setDownloadTreeUri(uri) }
+    }
+
     fun setSchedule(enabled: Boolean, startMinute: Int, endMinute: Int) {
         viewModelScope.launch {
             settingsRepository.setDownloadSchedule(enabled, startMinute, endMinute)

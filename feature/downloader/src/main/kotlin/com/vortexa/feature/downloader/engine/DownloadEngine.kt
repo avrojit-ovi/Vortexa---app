@@ -30,9 +30,34 @@ data class SegmentState(
     fun isComplete(): Boolean = downloaded >= length
 }
 
+/** Where the bytes land. A plain file by default; SAF documents supply their own channel. */
+interface DownloadSink : java.io.Closeable {
+    val channel: FileChannel
+
+    /** Final number of bytes written, read before [close]. */
+    fun length(): Long
+
+    /** Sparse pre-allocation when the storage supports it. */
+    fun preallocate(size: Long) {}
+}
+
+internal class LocalFileSink(file: File) : DownloadSink {
+    private val raf = RandomAccessFile(file, "rw")
+
+    override val channel: FileChannel get() = raf.channel
+
+    override fun length(): Long = raf.length()
+
+    override fun preallocate(size: Long) = raf.setLength(size)
+
+    override fun close() = raf.close()
+}
+
 data class DownloadSpec(
     val url: HttpUrl,
     val file: File,
+    /** Opens a non-file destination (e.g. SAF) for the given total size; null uses [file]. */
+    val openSink: ((totalBytes: Long) -> DownloadSink)? = null,
     val headers: Map<String, String> = emptyMap(),
     val partCount: Int = 8,
     val minPartBytes: Long = KotlinSegmentPlanner.DEFAULT_MIN_SEGMENT_BYTES,
@@ -114,12 +139,13 @@ class DownloadEngine(
         // One limiter for every range, so the cap is per file and not per part.
         val limiter = RateLimiter(spec.bytesPerSecond)
 
-        try {
-            RandomAccessFile(spec.file, "rw").use { raf ->
+        val size = try {
+            val sink = spec.openSink?.invoke(metadata.totalBytes) ?: LocalFileSink(spec.file)
+            sink.use { out ->
                 // Sparse pre-allocation: the final size is known, holes are cheap.
-                raf.setLength(metadata.totalBytes)
-                val channel = raf.channel
-                downloadInto(spec, metadata, states, channel, alreadyOnDisk, limiter, http, emitter)
+                out.preallocate(metadata.totalBytes)
+                downloadInto(spec, metadata, states, out.channel, alreadyOnDisk, limiter, http, emitter)
+                out.length()
             }
         } catch (io: java.io.IOException) {
             // The partial file is kept on purpose so the next run can resume it.
@@ -127,7 +153,6 @@ class DownloadEngine(
             return@flow
         }
 
-        val size = spec.file.length()
         if (size != metadata.totalBytes) {
             emit(DownloadEvent.Failed("Size mismatch: expected ${metadata.totalBytes}, got $size"))
             return@flow

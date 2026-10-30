@@ -29,6 +29,11 @@
     <string name="settings_downloads">ডাউনলোড</string>
     <string name="settings_speed_limit">গতির সীমা</string>
     <string name="settings_speed_unlimited">আনলিমিটেড</string>
+    <string name="settings_download_folder">ডাউনলোড ফোল্ডার</string>
+    <string name="settings_download_folder_app">অ্যাপ স্টোরেজ (ডিফল্ট)</string>
+    <string name="settings_download_folder_custom">কাস্টম ফোল্ডার (শুধু নতুন ডাউনলোড)</string>
+    <string name="settings_download_folder_pick">বেছে নিন</string>
+    <string name="settings_download_folder_reset">রিসেট</string>
     <string name="settings_speed_value">%1$d KB/s</string>
     <string name="settings_schedule">রাতের ডাউনলোড</string>
     <string name="settings_schedule_summary">কিউতে থাকা ডাউনলোড শুধু %1$s-এর মধ্যে শুরু হয়। চলমান ডাউনলোড চলতেই থাকে।</string>

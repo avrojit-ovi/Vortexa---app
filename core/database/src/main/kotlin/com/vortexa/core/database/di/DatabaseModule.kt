@@ -3,6 +3,7 @@ package com.vortexa.core.database.di
 import android.content.Context
 import androidx.room.Room
 import com.vortexa.core.database.VortexaDatabase
+import com.vortexa.core.database.dao.BrowserEntryDao
 import com.vortexa.core.database.dao.DownloadDao
 import dagger.Module
 import dagger.Provides
@@ -19,11 +20,14 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): VortexaDatabase =
         Room.databaseBuilder(context, VortexaDatabase::class.java, VortexaDatabase.NAME)
-            .addMigrations(VortexaDatabase.MIGRATION_1_2)
+            .addMigrations(VortexaDatabase.MIGRATION_1_2, VortexaDatabase.MIGRATION_2_3)
             // Only a downgrade may wipe data; an upgrade never does.
             .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
             .build()
 
     @Provides
     fun provideDownloadDao(database: VortexaDatabase): DownloadDao = database.downloadDao()
+
+    @Provides
+    fun provideBrowserEntryDao(database: VortexaDatabase): BrowserEntryDao = database.browserEntryDao()
 }

@@ -30,6 +30,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Badge
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -60,12 +62,15 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vortexa.core.database.entity.BrowserEntryEntity
 import com.vortexa.feature.browser.adblock.Kind
 import com.vortexa.feature.browser.adblock.SniffedMedia
 import java.io.ByteArrayInputStream
@@ -90,6 +95,10 @@ fun BrowserScreen(
     val sniffed by viewModel.sniffed.collectAsStateWithLifecycle()
     val blockAds by viewModel.blockAds.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
+    val incognito by viewModel.incognito.collectAsStateWithLifecycle()
+    val bookmarks by viewModel.bookmarks.collectAsStateWithLifecycle()
+    val history by viewModel.history.collectAsStateWithLifecycle()
+    var showLibrary by remember { mutableStateOf<LibraryTab?>(null) }
 
     var webView by remember { mutableStateOf<WebView?>(null) }
     val savedStates = remember { mutableMapOf<Long, Bundle>() }
@@ -235,6 +244,14 @@ fun BrowserScreen(
             onToggleBlockAds = { viewModel.setBlockAds(!blockAds) },
             tabCount = tabsState.tabs.size,
             onTabs = { showTabs = true },
+            incognito = incognito,
+            bookmarked = bookmarks.any { it.url == tabsState.active.url },
+            onToggleBookmark = {
+                viewModel.toggleBookmark(tabsState.active.url, tabsState.active.title)
+            },
+            onShowBookmarks = { showLibrary = LibraryTab.BOOKMARKS },
+            onShowHistory = { showLibrary = LibraryTab.HISTORY },
+            onToggleIncognito = { viewModel.setIncognito(!incognito) },
         )
 
         if (loading) {
@@ -312,6 +329,26 @@ fun BrowserScreen(
         }
     }
 
+    showLibrary?.let { tab ->
+        ModalBottomSheet(onDismissRequest = { showLibrary = null }) {
+            LibrarySheet(
+                tab = tab,
+                bookmarks = bookmarks,
+                history = history,
+                onTabChange = { showLibrary = it },
+                onOpen = { url ->
+                    showLibrary = null
+                    address = BrowserUrl.display(url)
+                    viewModel.openInActive(url)
+                    webView?.loadUrl(url)
+                },
+                onRemoveBookmark = viewModel::removeBookmark,
+                onRemoveHistory = viewModel::removeHistory,
+                onClearHistory = viewModel::clearHistory,
+            )
+        }
+    }
+
     if (showMedia) {
         ModalBottomSheet(onDismissRequest = { showMedia = false }) {
             MediaSheet(
@@ -347,7 +384,15 @@ private fun AddressBar(
     onToggleBlockAds: () -> Unit,
     tabCount: Int,
     onTabs: () -> Unit,
+    incognito: Boolean,
+    bookmarked: Boolean,
+    onToggleBookmark: () -> Unit,
+    onShowBookmarks: () -> Unit,
+    onShowHistory: () -> Unit,
+    onToggleIncognito: () -> Unit,
 ) {
+    var menuOpen by remember { mutableStateOf(false) }
+    val menuLabel = stringResource(R.string.browser_menu)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -428,6 +473,162 @@ private fun AddressBar(
                 ),
             )
         }
+
+        Box {
+            IconButton(onClick = { menuOpen = true }) {
+                Text(
+                    text = "\u22EE",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.semantics {
+                        contentDescription = menuLabel
+                    },
+                )
+            }
+            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            stringResource(
+                                if (bookmarked) R.string.browser_remove_bookmark else R.string.browser_add_bookmark,
+                            ),
+                        )
+                    },
+                    onClick = {
+                        menuOpen = false
+                        onToggleBookmark()
+                    },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.browser_bookmarks)) },
+                    onClick = {
+                        menuOpen = false
+                        onShowBookmarks()
+                    },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.browser_history)) },
+                    onClick = {
+                        menuOpen = false
+                        onShowHistory()
+                    },
+                )
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            stringResource(
+                                if (incognito) R.string.browser_incognito_off else R.string.browser_incognito_on,
+                            ),
+                        )
+                    },
+                    onClick = {
+                        menuOpen = false
+                        onToggleIncognito()
+                    },
+                )
+            }
+        }
+    }
+}
+
+private enum class LibraryTab { BOOKMARKS, HISTORY }
+
+@Composable
+private fun LibrarySheet(
+    tab: LibraryTab,
+    bookmarks: List<BrowserEntryEntity>,
+    history: List<BrowserEntryEntity>,
+    onTabChange: (LibraryTab) -> Unit,
+    onOpen: (String) -> Unit,
+    onRemoveBookmark: (Long) -> Unit,
+    onRemoveHistory: (Long) -> Unit,
+    onClearHistory: () -> Unit,
+) {
+    val items = if (tab == LibraryTab.BOOKMARKS) bookmarks else history
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp, end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TextButton(onClick = { onTabChange(LibraryTab.BOOKMARKS) }) {
+                Text(
+                    text = stringResource(R.string.browser_bookmarks),
+                    color = if (tab == LibraryTab.BOOKMARKS) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+            }
+            TextButton(onClick = { onTabChange(LibraryTab.HISTORY) }) {
+                Text(
+                    text = stringResource(R.string.browser_history),
+                    color = if (tab == LibraryTab.HISTORY) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+            }
+            Spacer(Modifier.weight(1f))
+            if (tab == LibraryTab.HISTORY && history.isNotEmpty()) {
+                TextButton(onClick = onClearHistory) {
+                    Text(text = stringResource(R.string.browser_clear_history))
+                }
+            }
+        }
+
+        if (items.isEmpty()) {
+            Text(
+                text = stringResource(
+                    if (tab == LibraryTab.BOOKMARKS) R.string.browser_no_bookmarks else R.string.browser_no_history,
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(16.dp),
+            )
+        }
+
+        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            items(items, key = { it.id }) { entry ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onOpen(entry.url) }
+                        .padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = entry.title.ifBlank { BrowserUrl.display(entry.url) },
+                            style = MaterialTheme.typography.bodyLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = BrowserUrl.display(entry.url),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    IconButton(
+                        onClick = {
+                            if (tab == LibraryTab.BOOKMARKS) onRemoveBookmark(entry.id) else onRemoveHistory(entry.id)
+                        },
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_browser_close),
+                            contentDescription = stringResource(R.string.browser_remove),
+                        )
+                    }
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+            }
+        }
+        Spacer(Modifier.height(24.dp))
     }
 }
 

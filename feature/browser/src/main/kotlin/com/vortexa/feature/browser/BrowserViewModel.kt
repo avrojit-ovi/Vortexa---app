@@ -3,6 +3,7 @@ package com.vortexa.feature.browser
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vortexa.core.common.preferences.SettingsRepository
+import com.vortexa.core.database.entity.BrowserEntryEntity
 import com.vortexa.feature.browser.adblock.AdblockEngine
 import com.vortexa.feature.browser.adblock.Kind
 import com.vortexa.feature.browser.adblock.MediaSniffer
@@ -30,7 +31,37 @@ sealed interface BrowserMessage {
 class BrowserViewModel @Inject constructor(
     private val settings: SettingsRepository,
     private val downloads: DownloadManager,
+    private val library: BrowserLibrary,
 ) : ViewModel() {
+
+    private val _incognito = MutableStateFlow(false)
+    val incognito: StateFlow<Boolean> = _incognito.asStateFlow()
+
+    val bookmarks: StateFlow<List<BrowserEntryEntity>> = library.observeBookmarks()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val history: StateFlow<List<BrowserEntryEntity>> = library.observeHistory()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun setIncognito(enabled: Boolean) {
+        _incognito.value = enabled
+    }
+
+    fun toggleBookmark(url: String, title: String) {
+        viewModelScope.launch { library.toggleBookmark(url, title.ifBlank { url }) }
+    }
+
+    fun removeBookmark(id: Long) {
+        viewModelScope.launch { library.removeBookmark(id) }
+    }
+
+    fun removeHistory(id: Long) {
+        viewModelScope.launch { library.removeHistory(id) }
+    }
+
+    fun clearHistory() {
+        viewModelScope.launch { library.clearHistory() }
+    }
 
     private val _tabs = MutableStateFlow(BrowserTabs.initial())
     val tabs: StateFlow<BrowserTabsState> = _tabs.asStateFlow()
@@ -96,7 +127,11 @@ class BrowserViewModel @Inject constructor(
     }
 
     fun onPageFinished(url: String, title: String?) {
-        _tabs.update { BrowserTabs.updateActive(it, url, title?.takeIf { it.isNotBlank() }) }
+        val cleanTitle = title?.takeIf { it.isNotBlank() }
+        _tabs.update { BrowserTabs.updateActive(it, url, cleanTitle) }
+        viewModelScope.launch {
+            library.recordVisit(url, cleanTitle ?: url, incognito = _incognito.value)
+        }
     }
 
     fun openInActive(input: String): String? {

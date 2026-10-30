@@ -16,9 +16,10 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · ⛔ not built on purpose
 ## Browser (phase 5)
 | Feature | Status |
 |---|---|
-| Multi-tab WebView, incognito, bookmarks, history | ⏳ |
-| Own adblock engine (EasyList/uBlock parser) | ⏳ |
-| Media sniffer + download hook | ⏳ |
+| Multi-tab WebView (max 8, one live WebView, per-tab state) | ✅ |
+| Incognito, bookmarks, history | ✅ |
+| Own adblock engine (EasyList/uBlock parser) | ✅ |
+| Media sniffer + download hook | ✅ |
 
 ## Video (phase 6)
 | Feature | Status |
@@ -27,8 +28,8 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · ⛔ not built on purpose
 | Media3 ExoPlayer in a `MediaSessionService`: keeps playing when the screen closes, notification + headset keys | ✅ |
 | Resume where you stopped (per-file, credits guard) | ✅ |
 | Speed presets, fit/fill, ±10 s, PiP | ✅ |
-| HW/HW+/SW decoder switch, Kids Lock | ⏳ |
-| Gestures (brightness/volume/seek), subtitle formats + styling + delay | ⏳ |
+| HW/SW decoder switch (AUTO = hardware with software fallback), Kids Lock with PIN | ✅ |
+| Gestures (brightness/volume/seek), subtitle formats + size/background styling + delay | ✅ |
 
 ## Online sources (plugin architecture, opt-in)
 | Feature | Status |

@@ -1,6 +1,7 @@
 package com.vortexa.feature.settings
 
 import android.os.Build
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -63,6 +64,18 @@ fun SettingsScreen(
         viewModel.installPlugin(uri)
     }
 
+    val context = LocalContext.current
+    val pickFolder = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) {
+            // Keep access across restarts; without it the saved folder silently stops working.
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            )
+            viewModel.setDownloadTreeUri(uri.toString())
+        }
+    }
+
     SettingsContent(
         preferences = preferences,
         online = online,
@@ -70,6 +83,8 @@ fun SettingsScreen(
         onThemeModeChange = viewModel::setThemeMode,
         onDynamicColorChange = viewModel::setDynamicColor,
         onSpeedLimitChange = viewModel::setSpeedLimit,
+        onPickDownloadFolder = { pickFolder.launch(null) },
+        onResetDownloadFolder = { viewModel.setDownloadTreeUri("") },
         onScheduleChange = viewModel::setSchedule,
         onProxyChange = viewModel::setProxy,
         onOnlineSourcesChange = viewModel::setOnlineSources,
@@ -92,6 +107,8 @@ internal fun SettingsContent(
     onThemeModeChange: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
     onSpeedLimitChange: (Int) -> Unit,
+    onPickDownloadFolder: () -> Unit,
+    onResetDownloadFolder: () -> Unit,
     onScheduleChange: (Boolean, Int, Int) -> Unit,
     onProxyChange: (Boolean, ProxyType, String, Int, String, String) -> Unit,
     onOnlineSourcesChange: (Boolean) -> Unit,
@@ -148,6 +165,8 @@ internal fun SettingsContent(
         DownloadsSection(
             preferences = preferences,
             onSpeedLimitChange = onSpeedLimitChange,
+            onPickDownloadFolder = onPickDownloadFolder,
+            onResetDownloadFolder = onResetDownloadFolder,
             onScheduleChange = onScheduleChange,
             onProxyChange = onProxyChange,
         )
@@ -185,6 +204,8 @@ internal fun SettingsContent(
 private fun DownloadsSection(
     preferences: UserPreferences,
     onSpeedLimitChange: (Int) -> Unit,
+    onPickDownloadFolder: () -> Unit,
+    onResetDownloadFolder: () -> Unit,
     onScheduleChange: (Boolean, Int, Int) -> Unit,
     onProxyChange: (Boolean, ProxyType, String, Int, String, String) -> Unit,
 ) {
@@ -203,6 +224,39 @@ private fun DownloadsSection(
             selected = preferences.speedLimitKbps == kbps,
             onSelect = { onSpeedLimitChange(kbps) },
         )
+    }
+
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.settings_download_folder),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = if (preferences.downloadTreeUri.isEmpty()) {
+                    stringResource(R.string.settings_download_folder_app)
+                } else {
+                    stringResource(R.string.settings_download_folder_custom)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        TextButton(onClick = onPickDownloadFolder) {
+            Text(stringResource(R.string.settings_download_folder_pick))
+        }
+        if (preferences.downloadTreeUri.isNotEmpty()) {
+            TextButton(onClick = onResetDownloadFolder) {
+                Text(stringResource(R.string.settings_download_folder_reset))
+            }
+        }
     }
 
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

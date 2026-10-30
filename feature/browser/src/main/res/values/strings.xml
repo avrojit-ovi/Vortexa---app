@@ -33,4 +33,16 @@
     <string name="browser_kind_hls">HLS playlist</string>
     <string name="browser_kind_dash">DASH manifest</string>
     <string name="browser_kind_file">File</string>
+
+    <string name="browser_menu">More</string>
+    <string name="browser_add_bookmark">Add bookmark</string>
+    <string name="browser_remove_bookmark">Remove bookmark</string>
+    <string name="browser_bookmarks">Bookmarks</string>
+    <string name="browser_history">History</string>
+    <string name="browser_clear_history">Clear history</string>
+    <string name="browser_incognito_on">Start incognito tab</string>
+    <string name="browser_incognito_off">Leave incognito</string>
+    <string name="browser_no_bookmarks">No bookmarks yet</string>
+    <string name="browser_no_history">No history yet</string>
+    <string name="browser_remove">Remove</string>
 </resources>
